@@ -1,7 +1,7 @@
 @{
     RootModule = 'PSProxmox.dll'
     ModuleVersion = '2023.04.28.1324'
-    GUID = '12345678-1234-1234-1234-123456789012'
+    GUID = 'd24f0894-3d0c-4ef1-a41e-b273c3db86ad'
     Author = 'PSProxmox Team'
     CompanyName = 'PSProxmox'
     Copyright = 'Copyright © 2023'
@@ -14,7 +14,7 @@
         # Session Management
         'Connect-ProxmoxServer',
         'Disconnect-ProxmoxServer',
-        
+
         # Node and VM Management
         'Get-ProxmoxNode',
         'Get-ProxmoxVM',
@@ -23,17 +23,17 @@
         'Start-ProxmoxVM',
         'Stop-ProxmoxVM',
         'Restart-ProxmoxVM',
-        
+
         # Storage Management
         'Get-ProxmoxStorage',
         'New-ProxmoxStorage',
         'Remove-ProxmoxStorage',
-        
+
         # Network Management
         'Get-ProxmoxNetwork',
         'New-ProxmoxNetwork',
         'Remove-ProxmoxNetwork',
-        
+
         # User and Role Management
         'Get-ProxmoxUser',
         'New-ProxmoxUser',
@@ -41,7 +41,7 @@
         'Get-ProxmoxRole',
         'New-ProxmoxRole',
         'Remove-ProxmoxRole',
-        
+
         # SDN Management
         'Get-ProxmoxSDNZone',
         'New-ProxmoxSDNZone',
@@ -49,20 +49,20 @@
         'Get-ProxmoxSDNVnet',
         'New-ProxmoxSDNVnet',
         'Remove-ProxmoxSDNVnet',
-        
+
         # Cluster Management
         'Get-ProxmoxCluster',
         'Join-ProxmoxCluster',
         'Leave-ProxmoxCluster',
         'New-ProxmoxClusterBackup',
         'Restore-ProxmoxClusterBackup',
-        
+
         # Template Management
         'Get-ProxmoxVMTemplate',
         'New-ProxmoxVMTemplate',
         'Remove-ProxmoxVMTemplate',
         'New-ProxmoxVMFromTemplate',
-        
+
         # IP Management
         'New-ProxmoxIPPool',
         'Get-ProxmoxIPPool',
@@ -73,8 +73,8 @@
     PrivateData = @{
         PSData = @{
             Tags = @('Proxmox', 'VirtualMachine', 'Cluster', 'Management')
-            LicenseUri = 'https://github.com/PSProxmox/PSProxmox/blob/main/LICENSE'
-            ProjectUri = 'https://github.com/PSProxmox/PSProxmox'
+            LicenseUri = 'https://github.com/freedbygrace/PSProxmox/blob/main/LICENSE'
+            ProjectUri = 'https://github.com/freedbygrace/PSProxmox'
             ReleaseNotes = 'Initial release of PSProxmox module'
         }
     }
