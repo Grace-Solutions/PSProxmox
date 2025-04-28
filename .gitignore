@@ -27,6 +27,7 @@ TestResults/
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
+Release/
 [Rr]eleases/
 x64/
 x86/
@@ -37,6 +38,13 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+
+# Package files
+*.zip
+*.7z
+*.tar
+*.tar.gz
+*.tgz
 
 # PowerShell module artifacts
 *.psm1
