@@ -1,0 +1,32 @@
+# Install-PSProxmox.ps1
+# This script installs the PSProxmox module to the user's PowerShell modules directory
+
+# Define the module name
+$moduleName = "PSProxmox"
+
+# Define the destination path
+$modulePath = "$env:USERPROFILE\Documents\WindowsPowerShell\Modules\$moduleName"
+if ($PSVersionTable.PSEdition -eq "Core") {
+    $modulePath = "$env:USERPROFILE\Documents\PowerShell\Modules\$moduleName"
+}
+
+# Create the module directory if it doesn't exist
+if (-not (Test-Path -Path $modulePath)) {
+    New-Item -Path $modulePath -ItemType Directory -Force | Out-Null
+    Write-Host "Created module directory: $modulePath"
+}
+
+# Create the bin directory if it doesn't exist
+if (-not (Test-Path -Path "$modulePath\bin")) {
+    New-Item -Path "$modulePath\bin" -ItemType Directory -Force | Out-Null
+    Write-Host "Created bin directory: $modulePath\bin"
+}
+
+# Copy the module files
+Copy-Item -Path "$PSScriptRoot\PSProxmox.psd1" -Destination $modulePath -Force
+Copy-Item -Path "$PSScriptRoot\bin\PSProxmox.dll" -Destination "$modulePath\bin" -Force
+Copy-Item -Path "$PSScriptRoot\LICENSE" -Destination $modulePath -Force
+Copy-Item -Path "$PSScriptRoot\README.md" -Destination $modulePath -Force
+
+Write-Host "PSProxmox module has been installed to $modulePath"
+Write-Host "You can now import the module using: Import-Module $moduleName"
