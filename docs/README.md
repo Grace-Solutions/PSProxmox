@@ -1,4 +1,4 @@
-# PSProxmox
+# PSProxmox Documentation
 
 PSProxmox is a C#-based PowerShell module for managing Proxmox VE clusters. It provides a comprehensive set of cmdlets for interacting with Proxmox VE API, featuring structured return objects, mass deployment tools, automatic IP management, and more.
 
@@ -12,47 +12,60 @@ PSProxmox is a C#-based PowerShell module for managing Proxmox VE clusters. It p
 - **Structured Objects**: All outputs are typed C# classes (PowerShell-native)
 - **Pipeline Support**: Cmdlets support pipeline input where appropriate
 
+## Getting Started
+
+- [Installation Guide](guides/Installation.md)
+- [Connection Guide](guides/Connection.md)
+- [Authentication Methods](guides/Authentication.md)
+
+## Documentation
+
+- [Cmdlet Reference](cmdlets/README.md) - Detailed documentation for all cmdlets
+- [Examples](examples/README.md) - Example scripts for common tasks
+- [Guides](guides/README.md) - Comprehensive guides for various topics
+
 ## Requirements
 
 - PowerShell 5.1 or PowerShell 7+
 - .NET Framework 4.7.2 or .NET Core 2.0+
 
-## Installation
-
-```powershell
-# Install from PSGallery (when published)
-Install-Module -Name PSProxmox
-
-# Import the module
-Import-Module PSProxmox
-```
-
 ## Quick Start
 
 ```powershell
-# Connect to a Proxmox server
-$connection = Connect-ProxmoxServer -Server "proxmox.example.com" -Credential (Get-Credential)
+# Install from PowerShell Gallery
+Install-Module -Name PSProxmox -Scope CurrentUser
+
+# Import the module
+Import-Module PSProxmox
+
+# Connect to a Proxmox VE server
+$credential = Get-Credential
+$connection = Connect-ProxmoxServer -Server "proxmox.example.com" -Credential $credential -Realm "pam"
 
 # Get all VMs
 $vms = Get-ProxmoxVM -Connection $connection
 
 # Create a new VM
-$newVM = New-ProxmoxVM -Connection $connection -Name "test-vm" -Memory 2048 -Cores 2 -DiskSize 32
+$vm = New-ProxmoxVM -Connection $connection -Node "pve1" -Name "test-vm" -Memory 2048 -Cores 2 -DiskSize 32 -Start
 
-# Start a VM
-Start-ProxmoxVM -Connection $connection -VMID $newVM.VMID
-
-# Disconnect from the server
+# Disconnect when done
 Disconnect-ProxmoxServer -Connection $connection
 ```
 
-## Documentation
+## Using the Documentation
 
-For detailed documentation on each cmdlet, use the built-in PowerShell help:
+For detailed documentation on each cmdlet, you can:
 
-```powershell
-Get-Help Connect-ProxmoxServer -Full
-```
+1. Use the built-in PowerShell help:
+   ```powershell
+   Get-Help Connect-ProxmoxServer -Full
+   ```
+
+2. Browse the [Cmdlet Reference](cmdlets/README.md) for detailed documentation on all cmdlets.
+
+3. Check the [Examples](examples/README.md) for example scripts for common tasks.
+
+4. Read the [Guides](guides/README.md) for comprehensive guides on various topics.
 
 ## Contributing
 
