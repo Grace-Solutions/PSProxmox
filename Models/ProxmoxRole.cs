@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PSProxmox.Models
 {
@@ -30,6 +31,6 @@ namespace PSProxmox.Models
         /// Gets the role's privileges as a list.
         /// </summary>
         [JsonIgnore]
-        public List<string> PrivilegesList => Privileges?.Split(',') ?? new List<string>();
+        public List<string> PrivilegesList => Privileges?.Split(',').ToList() ?? new List<string>();
     }
 }

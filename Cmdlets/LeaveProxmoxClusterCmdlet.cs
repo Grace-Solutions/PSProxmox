@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Management.Automation;
 using PSProxmox.Client;
 using PSProxmox.Session;
@@ -14,7 +15,7 @@ namespace PSProxmox.Cmdlets
     ///   <code>Leave-ProxmoxCluster -Connection $connection -Force</code>
     /// </example>
     /// </summary>
-    [Cmdlet(VerbsCommon.Leave, "ProxmoxCluster", SupportsShouldProcess = true, ConfirmImpact = ConfirmImpact.High)]
+    [Cmdlet("Leave", "ProxmoxCluster", SupportsShouldProcess = true, ConfirmImpact = ConfirmImpact.High)]
     public class LeaveProxmoxClusterCmdlet : PSCmdlet
     {
         /// <summary>
@@ -53,7 +54,12 @@ namespace PSProxmox.Cmdlets
                 }
 
                 WriteVerbose($"Removing node {Connection.Server} from cluster");
-                client.Delete("cluster/leave", parameters);
+                string queryString = "";
+                if (parameters.Count > 0)
+                {
+                    queryString = "?" + string.Join("&", parameters.Select(p => $"{p.Key}={p.Value}"));
+                }
+                client.Delete($"cluster/leave{queryString}");
 
                 WriteVerbose($"Node {Connection.Server} removed from cluster");
             }

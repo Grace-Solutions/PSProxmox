@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="PowerShellStandard.Library" Version="5.1.0" />
-    <PackageReference Include="System.Management.Automation" Version="7.0.0" />
+    <PackageReference Include="System.Management.Automation" Version="6.1.7" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 

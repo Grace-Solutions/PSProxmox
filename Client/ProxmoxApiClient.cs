@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Management.Automation;
@@ -78,7 +79,7 @@ namespace PSProxmox.Client
             }
 
             string url = $"{_connection.ApiUrl}/{endpoint}";
-            
+
             // Log the URL if verbose is enabled
             if (_cmdlet != null)
             {
@@ -89,7 +90,7 @@ namespace PSProxmox.Client
             var request = (HttpWebRequest)WebRequest.Create(url);
             request.Method = method;
             request.Headers.Add("Cookie", $"PVEAuthCookie={_connection.Ticket}");
-            
+
             if (method != "GET")
             {
                 request.Headers.Add("CSRFPreventionToken", _connection.CSRFPreventionToken);
@@ -104,10 +105,9 @@ namespace PSProxmox.Client
             // Add parameters for POST/PUT requests
             if (parameters != null && (method == "POST" || method == "PUT"))
             {
-                string postData = string.Join("&", Array.ConvertAll(
-                    parameters.Keys.ToArray(),
-                    key => $"{Uri.EscapeDataString(key)}={Uri.EscapeDataString(parameters[key])}"
-                ));
+                string postData = string.Join("&",
+                    parameters.Keys.Select(key => $"{Uri.EscapeDataString(key)}={Uri.EscapeDataString(parameters[key])}")
+                );
 
                 byte[] byteArray = Encoding.UTF8.GetBytes(postData);
                 request.ContentType = "application/x-www-form-urlencoded";

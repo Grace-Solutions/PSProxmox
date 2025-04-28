@@ -73,7 +73,7 @@ namespace PSProxmox.Cmdlets
         /// <para type="description">Additional parameters for the storage.</para>
         /// </summary>
         [Parameter(Mandatory = false)]
-        public Hashtable AdditionalParameters { get; set; }
+        public Dictionary<string, string> AdditionalParameters { get; set; }
 
         /// <summary>
         /// Processes the cmdlet.
@@ -119,7 +119,7 @@ namespace PSProxmox.Cmdlets
                 }
 
                 // Create the storage
-                string createResponse = client.Post("storage", parameters);
+                client.Post("storage", parameters);
 
                 // Get the created storage
                 string storageResponse = client.Get($"storage/{Name}");
