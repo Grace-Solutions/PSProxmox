@@ -83,7 +83,7 @@
             Tags = @('Proxmox', 'VirtualMachine', 'Cluster', 'Management')
             LicenseUri = 'https://github.com/freedbygrace/PSProxmox/blob/main/LICENSE'
             ProjectUri = 'https://github.com/freedbygrace/PSProxmox'
-            ReleaseNotes = 'Initial release of PSProxmox module'
+            ReleaseNotes = 'Initial release of PSProxmox module. See https://github.com/freedbygrace/PSProxmox/releases/tag/v2025.04.28.1902'
         }
     }
 }
