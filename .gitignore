@@ -34,8 +34,8 @@ x86/
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
 bld/
-[Bb]in/
-[Oo]bj/
+PSProxmox/[Bb]in/
+PSProxmox/[Oo]bj/
 [Ll]og/
 [Ll]ogs/
 
@@ -45,6 +45,10 @@ bld/
 *.tar
 *.tar.gz
 *.tgz
+
+# Module bin folder (except the DLL)
+Module/bin/*
+!Module/bin/PSProxmox.dll
 
 # PowerShell module artifacts
 *.psm1
