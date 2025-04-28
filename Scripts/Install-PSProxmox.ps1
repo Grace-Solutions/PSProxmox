@@ -1,6 +1,10 @@
 # Install-PSProxmox.ps1
 # This script installs the PSProxmox module to the user's PowerShell modules directory
 
+# Set script root path for relative paths
+$scriptRoot = $PSScriptRoot
+$rootPath = Split-Path -Parent $scriptRoot
+
 # Define the module name
 $moduleName = "PSProxmox"
 
@@ -23,10 +27,10 @@ if (-not (Test-Path -Path "$modulePath\bin")) {
 }
 
 # Copy the module files
-Copy-Item -Path "$PSScriptRoot\PSProxmox.psd1" -Destination $modulePath -Force
-Copy-Item -Path "$PSScriptRoot\bin\PSProxmox.dll" -Destination "$modulePath\bin" -Force
-Copy-Item -Path "$PSScriptRoot\LICENSE" -Destination $modulePath -Force
-Copy-Item -Path "$PSScriptRoot\README.md" -Destination $modulePath -Force
+Copy-Item -Path "$rootPath\Module\PSProxmox.psd1" -Destination $modulePath -Force
+Copy-Item -Path "$rootPath\Module\bin\PSProxmox.dll" -Destination "$modulePath\bin" -Force
+Copy-Item -Path "$rootPath\LICENSE" -Destination $modulePath -Force
+Copy-Item -Path "$rootPath\README.md" -Destination $modulePath -Force
 
 Write-Host "PSProxmox module has been installed to $modulePath"
 Write-Host "You can now import the module using: Import-Module $moduleName"
