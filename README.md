@@ -188,6 +188,10 @@ Clear-ProxmoxIPPool -Name "Production"
 Disconnect-ProxmoxServer -Connection $connection
 ```
 
+## Documentation
+
+For detailed documentation, see the [Documentation](Documentation) directory.
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.

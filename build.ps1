@@ -11,37 +11,41 @@ $psd1Content = Get-Content -Path $psd1Path -Raw
 $psd1Content = $psd1Content -replace "ModuleVersion = '.*'", "ModuleVersion = '$version'"
 Set-Content -Path $psd1Path -Value $psd1Content
 
-# Build the solution
-Write-Host "Building solution..."
-dotnet build .\PSProxmox\PSProxmox.Main.csproj -c Release
+# Create the release directory structure
+$releaseBaseDir = ".\Release"
+$releaseVersionDir = "$releaseBaseDir\$version"
+$releaseBinDir = "$releaseVersionDir\bin"
 
-# Create the release directory
-$releaseDir = ".\Release\$version"
-if (-not (Test-Path -Path $releaseDir)) {
-    New-Item -Path $releaseDir -ItemType Directory -Force | Out-Null
-    Write-Host "Created release directory: $releaseDir"
+# Create directories if they don't exist
+if (-not (Test-Path -Path $releaseBaseDir)) {
+    New-Item -Path $releaseBaseDir -ItemType Directory -Force | Out-Null
 }
-
-# Copy the module files to the release directory
-Copy-Item -Path .\Module\PSProxmox.psd1 -Destination $releaseDir -Force
-Copy-Item -Path .\Module\bin\PSProxmox.dll -Destination $releaseDir -Force
-Copy-Item -Path .\Module\LICENSE -Destination $releaseDir -Force
-Copy-Item -Path .\Module\README.md -Destination $releaseDir -Force
-Copy-Item -Path .\Module\Install-PSProxmox.ps1 -Destination $releaseDir -Force
-
-# Create a bin directory in the release directory
-$releaseBinDir = "$releaseDir\bin"
+if (-not (Test-Path -Path $releaseVersionDir)) {
+    New-Item -Path $releaseVersionDir -ItemType Directory -Force | Out-Null
+    Write-Host "Created release directory: $releaseVersionDir"
+}
 if (-not (Test-Path -Path $releaseBinDir)) {
     New-Item -Path $releaseBinDir -ItemType Directory -Force | Out-Null
     Write-Host "Created bin directory: $releaseBinDir"
 }
 
-# Copy the DLL to the bin directory
-Copy-Item -Path .\Module\bin\PSProxmox.dll -Destination $releaseBinDir -Force
+# Build the solution directly to the release bin directory
+Write-Host "Building solution..."
+dotnet build .\PSProxmox\PSProxmox.Main.csproj -c Release -o $releaseBinDir
+
+# Copy the module files to the release directory
+Copy-Item -Path .\Module\PSProxmox.psd1 -Destination $releaseVersionDir -Force
+Copy-Item -Path .\LICENSE -Destination $releaseVersionDir -Force
+Copy-Item -Path .\README.md -Destination $releaseVersionDir -Force
+Copy-Item -Path .\Module\Install-PSProxmox.ps1 -Destination $releaseVersionDir -Force
+
+# Copy the fully prepared module back to the Module directory
+Write-Host "Updating Module directory with built files..."
+Copy-Item -Path $releaseBinDir\PSProxmox.dll -Destination .\Module\bin -Force
 
 # Create a ZIP file of the release
-$zipPath = ".\Release\PSProxmox-$version.zip"
-Compress-Archive -Path $releaseDir\* -DestinationPath $zipPath -Force
+$zipPath = "$releaseBaseDir\PSProxmox-$version.zip"
+Compress-Archive -Path $releaseVersionDir\* -DestinationPath $zipPath -Force
 Write-Host "Created release package: $zipPath"
 
 Write-Host "Build completed successfully!"

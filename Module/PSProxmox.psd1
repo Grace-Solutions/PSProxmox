@@ -1,6 +1,6 @@
 @{
     RootModule = 'PSProxmox.dll'
-    ModuleVersion = '2025.04.28.1934'
+    ModuleVersion = '2025.04.28.1937'
     GUID = 'd24f0894-3d0c-4ef1-a41e-b273c3db86ad'
     Author = 'PSProxmox Team'
     CompanyName = 'PSProxmox'
@@ -87,4 +87,5 @@
         }
     }
 }
+
 

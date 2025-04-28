@@ -95,8 +95,4 @@
     <None Include="..\Module\PSProxmox.psd1" CopyToOutputDirectory="Always" />
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Copy SourceFiles="$(TargetDir)$(TargetFileName)" DestinationFolder="..\Module\bin" />
-  </Target>
-
 </Project>
