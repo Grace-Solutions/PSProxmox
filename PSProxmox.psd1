@@ -9,6 +9,14 @@
     PowerShellVersion = '5.1'
     DotNetFrameworkVersion = '4.7.2'
     CompatiblePSEditions = @('Desktop', 'Core')
+    # Assemblies that must be loaded prior to importing this module
+    RequiredAssemblies = @('bin\PSProxmox.dll')
+    # Script files (.ps1) that are run in the caller's environment prior to importing this module
+    ScriptsToProcess = @()
+    # Type files (.ps1xml) to be loaded when importing this module
+    TypesToProcess = @()
+    # Format files (.ps1xml) to be loaded when importing this module
+    FormatsToProcess = @()
     FunctionsToExport = @()
     CmdletsToExport = @(
         # Session Management

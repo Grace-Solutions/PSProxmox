@@ -93,7 +93,6 @@
 
   <ItemGroup>
     <None Include="PSProxmox.psd1" CopyToOutputDirectory="Always" />
-    <None Include="PSProxmox.psm1" CopyToOutputDirectory="Always" />
   </ItemGroup>
 
 </Project>
