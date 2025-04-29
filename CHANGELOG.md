@@ -5,6 +5,26 @@ All notable changes to the PSProxmox module will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2025.04.28.2035] - 2025-04-28
+
+### Added
+- Comprehensive documentation in the Documentation folder
+- Example scripts for common tasks
+- Installation guide and usage guides
+- Build and installation scripts in the Scripts folder
+
+### Changed
+- Reorganized project structure to separate source code from module files
+- Updated module manifest to use NestedModules for loading the DLL
+- Improved build process with dedicated build scripts
+- Enhanced installation process with multiple installation options
+
+### Fixed
+- Fixed dependency loading by including Newtonsoft.Json.dll in the module
+- Fixed Connect-ProxmoxServer to return ProxmoxConnection instead of ProxmoxConnectionInfo
+- Fixed module loading issues by using a PSM1 file as the root module
+- Fixed type mismatch between ProxmoxConnectionInfo and ProxmoxConnection
+
 ## [2023.04.28.1324] - 2023-04-28
 
 ### Added
