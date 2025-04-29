@@ -25,9 +25,9 @@ If you want to install it for all users on the system, run the following command
 Install-Module -Name PSProxmox -Scope AllUsers
 ```
 
-### Method 2: Install from GitHub
+### Method 2: Install from GitHub Release
 
-You can also install the PSProxmox module directly from GitHub:
+You can also install the PSProxmox module directly from a GitHub release:
 
 1. Download the latest release from the [GitHub repository](https://github.com/freedbygrace/PSProxmox/releases)
 2. Extract the ZIP file
@@ -37,7 +37,27 @@ You can also install the PSProxmox module directly from GitHub:
 .\Install-PSProxmox.ps1
 ```
 
-### Method 3: Manual Installation
+### Method 3: Build and Install from Source
+
+You can build and install the PSProxmox module from source:
+
+1. Clone the repository:
+```powershell
+git clone https://github.com/freedbygrace/PSProxmox.git
+cd PSProxmox
+```
+
+2. Build the module:
+```powershell
+.\Scripts\build.ps1
+```
+
+3. Install the module:
+```powershell
+.\Scripts\Install-PSProxmox.ps1
+```
+
+### Method 4: Manual Installation
 
 You can manually install the PSProxmox module by copying the files to your PowerShell modules directory:
 
@@ -47,12 +67,12 @@ You can manually install the PSProxmox module by copying the files to your Power
 
 For Windows PowerShell:
 ```powershell
-Copy-Item -Path .\PSProxmox-Dist\* -Destination "$env:USERPROFILE\Documents\WindowsPowerShell\Modules\PSProxmox" -Recurse -Force
+Copy-Item -Path .\* -Destination "$env:USERPROFILE\Documents\WindowsPowerShell\Modules\PSProxmox" -Recurse -Force
 ```
 
 For PowerShell Core:
 ```powershell
-Copy-Item -Path .\PSProxmox-Dist\* -Destination "$env:USERPROFILE\Documents\PowerShell\Modules\PSProxmox" -Recurse -Force
+Copy-Item -Path .\* -Destination "$env:USERPROFILE\Documents\PowerShell\Modules\PSProxmox" -Recurse -Force
 ```
 
 ## Verifying the Installation

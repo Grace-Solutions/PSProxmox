@@ -1,12 +1,46 @@
 # PSProxmox
 
-PSProxmox is a PowerShell module for managing Proxmox VE clusters. It provides a comprehensive set of cmdlets for managing virtual machines, storage, networks, users, roles, and more.
+PSProxmox is a C#-based PowerShell module for managing Proxmox VE clusters. It provides a comprehensive set of cmdlets for interacting with Proxmox VE API, featuring structured return objects, mass deployment tools, automatic IP management, and more.
+
+## Features
+
+- **Session Management**: Authenticate and persist sessions with Proxmox VE clusters
+- **Core CRUD Operations**: Manage VMs, Storage, Network, Users, Roles, SDN, and Clusters
+- **Templates**: Create and use VM deployment templates
+- **Mass Creation**: Bulk create VMs with prefix/counter
+- **IP Management**: CIDR parsing, subnetting, FIFO IP queue assignment
+- **Structured Objects**: All outputs are typed C# classes (PowerShell-native)
+- **Pipeline Support**: Cmdlets support pipeline input where appropriate
+
+## Project Structure
+
+- **Module/**: Contains the PowerShell module files
+- **PSProxmox/**: Contains the C# source code for the module
+- **Documentation/**: Contains detailed documentation and examples
+- **Scripts/**: Contains build and installation scripts
+- **Release/**: Contains built releases (created by build script)
 
 ## Installation
+
+### From PowerShell Gallery (Recommended)
 
 ```powershell
 # Install from PowerShell Gallery
 Install-Module -Name PSProxmox -Scope CurrentUser
+```
+
+### Manual Installation
+
+```powershell
+# Clone the repository
+git clone https://github.com/freedbygrace/PSProxmox.git
+cd PSProxmox
+
+# Build the module
+.\Scripts\build.ps1
+
+# Install the module
+.\Scripts\Install-PSProxmox.ps1
 ```
 
 ## Getting Started
@@ -188,9 +222,41 @@ Clear-ProxmoxIPPool -Name "Production"
 Disconnect-ProxmoxServer -Connection $connection
 ```
 
+## Development
+
+### Building the Module
+
+To build the module from source:
+
+```powershell
+# Run the build script
+.\Scripts\build.ps1
+```
+
+This will:
+1. Compile the C# code
+2. Create a versioned release in the Release folder
+3. Update the Module folder with the latest build
+4. Create a ZIP package for distribution
+
+### Project Organization
+
+- **C# Source Code**: All C# source code is in the PSProxmox folder
+- **PowerShell Module**: The PowerShell module files are in the Module folder
+- **Documentation**: Comprehensive documentation is in the Documentation folder
+- **Scripts**: Build and installation scripts are in the Scripts folder
+
 ## Documentation
 
-For detailed documentation, see the [Documentation](Documentation) directory.
+For detailed documentation, see the [Documentation](Documentation) directory. The documentation includes:
+
+- [Cmdlet Reference](Documentation/cmdlets/README.md)
+- [Examples](Documentation/examples/README.md)
+- [Guides](Documentation/guides/README.md)
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
