@@ -1,6 +1,7 @@
 @{
     RootModule = 'PSProxmox.psm1'
-    ModuleVersion = '2025.04.28.2022'
+    NestedModules = @('bin\PSProxmox.dll')
+    ModuleVersion = '2025.04.28.2025'
     GUID = 'd24f0894-3d0c-4ef1-a41e-b273c3db86ad'
     Author = 'PSProxmox Team'
     CompanyName = 'PSProxmox'
@@ -10,9 +11,7 @@
     DotNetFrameworkVersion = '4.7.2'
     CompatiblePSEditions = @('Desktop', 'Core')
     # Assemblies that must be loaded prior to importing this module
-    RequiredAssemblies = @('bin\Newtonsoft.Json.dll')
-    # Assemblies to process when importing this module
-    AssembliesToProcess = @('bin\PSProxmox.dll')
+    RequiredAssemblies = @('bin\PSProxmox.dll', 'bin\Newtonsoft.Json.dll')
     # Script files (.ps1) that are run in the caller's environment prior to importing this module
     ScriptsToProcess = @()
     # Type files (.ps1xml) to be loaded when importing this module
@@ -89,6 +88,7 @@
         }
     }
 }
+
 
 
 
