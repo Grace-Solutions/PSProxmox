@@ -21,7 +21,7 @@ namespace PSProxmox.Cmdlets
     /// </example>
     /// </summary>
     [Cmdlet(VerbsCommunications.Connect, "ProxmoxServer")]
-    [OutputType(typeof(ProxmoxConnectionInfo))]
+    [OutputType(typeof(ProxmoxConnection))]
     public class ConnectProxmoxServerCmdlet : PSCmdlet
     {
         /// <summary>
@@ -108,7 +108,8 @@ namespace PSProxmox.Cmdlets
                     Realm,
                     this);
 
-                WriteObject(ProxmoxConnectionInfo.FromConnection(connection));
+                // Return the actual connection object instead of the connection info
+                WriteObject(connection);
                 SessionState.PSVariable.Set(new PSVariable("ProxmoxConnection", connection, ScopedItemOptions.Private));
             }
             catch (Exception ex)
