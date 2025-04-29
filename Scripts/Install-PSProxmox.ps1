@@ -29,6 +29,7 @@ if (-not (Test-Path -Path "$modulePath\bin")) {
 # Copy the module files
 Copy-Item -Path "$rootPath\Module\PSProxmox.psd1" -Destination $modulePath -Force
 Copy-Item -Path "$rootPath\Module\bin\PSProxmox.dll" -Destination "$modulePath\bin" -Force
+Copy-Item -Path "$rootPath\Module\bin\Newtonsoft.Json.dll" -Destination "$modulePath\bin" -Force
 Copy-Item -Path "$rootPath\LICENSE" -Destination $modulePath -Force
 Copy-Item -Path "$rootPath\README.md" -Destination $modulePath -Force
 

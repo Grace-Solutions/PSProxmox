@@ -43,9 +43,19 @@ Copy-Item -Path "$rootPath\LICENSE" -Destination $releaseVersionDir -Force
 Copy-Item -Path "$rootPath\README.md" -Destination $releaseVersionDir -Force
 Copy-Item -Path "$scriptRoot\Install-PSProxmox.ps1" -Destination $releaseVersionDir -Force
 
+# Make sure the bin directory exists in the release directory
+if (-not (Test-Path -Path "$releaseVersionDir\bin")) {
+    New-Item -Path "$releaseVersionDir\bin" -ItemType Directory -Force | Out-Null
+    Write-Host "Created bin directory in release: $releaseVersionDir\bin"
+}
+
 # Copy the fully prepared module back to the Module directory
 Write-Host "Updating Module directory with built files..."
 Copy-Item -Path "$releaseBinDir\PSProxmox.dll" -Destination "$rootPath\Module\bin" -Force
+
+# Copy dependencies to the Module directory
+Write-Host "Copying dependencies to Module directory..."
+Copy-Item -Path "$releaseBinDir\Newtonsoft.Json.dll" -Destination "$rootPath\Module\bin" -Force
 
 # Create a ZIP file of the release
 $zipPath = "$releaseBaseDir\PSProxmox-$version.zip"
