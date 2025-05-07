@@ -74,7 +74,7 @@ namespace PSProxmox.Models
         /// <summary>
         /// Gets or sets the SMBIOS settings for the VM.
         /// </summary>
-        public ProxmoxVMSMBIOS SMBIOS { get; set; } = new ProxmoxVMSMBIOS();
+        public PSProxmox.Models.ProxmoxVMSMBIOS SMBIOS { get; set; } = new PSProxmox.Models.ProxmoxVMSMBIOS();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ProxmoxVMBuilder"/> class.
@@ -417,9 +417,9 @@ namespace PSProxmox.Models
         /// </summary>
         /// <param name="smbios">The SMBIOS settings.</param>
         /// <returns>The builder instance.</returns>
-        public ProxmoxVMBuilder WithSMBIOS(ProxmoxVMSMBIOS smbios)
+        public ProxmoxVMBuilder WithSMBIOS(PSProxmox.Models.ProxmoxVMSMBIOS smbios)
         {
-            SMBIOS = smbios ?? new ProxmoxVMSMBIOS();
+            SMBIOS = smbios ?? new PSProxmox.Models.ProxmoxVMSMBIOS();
             return this;
         }
 
@@ -430,7 +430,7 @@ namespace PSProxmox.Models
         /// <returns>The builder instance.</returns>
         public ProxmoxVMBuilder WithSMBIOSProfile(string manufacturer)
         {
-            SMBIOS = ProxmoxVMSMBIOSProfile.GetProfile(manufacturer);
+            SMBIOS = PSProxmox.Models.ProxmoxVMSMBIOSProfile.GetProfile(manufacturer);
             return this;
         }
 

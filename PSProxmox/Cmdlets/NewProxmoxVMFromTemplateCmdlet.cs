@@ -68,6 +68,13 @@ namespace PSProxmox.Cmdlets
         public int StartIndex { get; set; } = 1;
 
         /// <summary>
+        /// <para type="description">The number of digits to use for the counter in VM names (e.g., 3 would result in "Prefix-001").</para>
+        /// </summary>
+        [Parameter(Mandatory = false, ParameterSetName = "MultipleVMs")]
+        [ValidateRange(1, 10)]
+        public int CounterDigits { get; set; } = 1;
+
+        /// <summary>
         /// <para type="description">The VM ID. If not specified, the next available ID will be used.</para>
         /// </summary>
         [Parameter(Mandatory = false, ParameterSetName = "SingleVM")]
@@ -128,6 +135,19 @@ namespace PSProxmox.Cmdlets
         public string Description { get; set; }
 
         /// <summary>
+        /// <para type="description">Whether to automatically generate SMBIOS values.</para>
+        /// </summary>
+        [Parameter(Mandatory = false)]
+        public SwitchParameter AutomaticSMBIOS { get; set; }
+
+        /// <summary>
+        /// <para type="description">The manufacturer profile to use for SMBIOS values. Valid values are: Proxmox, Dell, HP, Lenovo, Microsoft, VMware, HyperV, VirtualBox, Random.</para>
+        /// </summary>
+        [Parameter(Mandatory = false)]
+        [ValidateSet("Proxmox", "Dell", "HP", "Lenovo", "Microsoft", "VMware", "HyperV", "VirtualBox", "Random")]
+        public string SMBIOSProfile { get; set; } = "Random";
+
+        /// <summary>
         /// Processes the cmdlet.
         /// </summary>
         protected override void ProcessRecord()
@@ -165,7 +185,11 @@ namespace PSProxmox.Cmdlets
                     var vms = new List<ProxmoxVM>();
                     for (int i = 0; i < Count; i++)
                     {
-                        string vmName = $"{Prefix}{StartIndex + i}";
+                        // Format the counter with the specified number of digits
+                        string counterFormat = new string('0', CounterDigits);
+                        string formattedCounter = (StartIndex + i).ToString(counterFormat);
+                        string vmName = $"{Prefix}{formattedCounter}";
+
                         var vm = CreateVMFromTemplate(client, template, vmName, null);
                         vms.Add(vm);
                     }
@@ -231,14 +255,31 @@ namespace PSProxmox.Cmdlets
             vm.VMID = vmId.Value;
 
             // Update network settings if specified
-            if (!string.IsNullOrEmpty(NetworkModel) || !string.IsNullOrEmpty(NetworkBridge))
+            if (!string.IsNullOrEmpty(NetworkModel) || !string.IsNullOrEmpty(NetworkBridge) || AutomaticSMBIOS.IsPresent)
             {
-                var networkParams = new Dictionary<string, string>();
-                string netModel = NetworkModel ?? "virtio";
-                string netBridge = NetworkBridge ?? "vmbr0";
-                networkParams["net0"] = $"{netModel},bridge={netBridge}";
+                var configParams = new Dictionary<string, string>();
 
-                client.Put($"nodes/{Node}/qemu/{vmId.Value}/config", networkParams);
+                // Add network settings if specified
+                if (!string.IsNullOrEmpty(NetworkModel) || !string.IsNullOrEmpty(NetworkBridge))
+                {
+                    string netModel = NetworkModel ?? "virtio";
+                    string netBridge = NetworkBridge ?? "vmbr0";
+                    configParams["net0"] = $"{netModel},bridge={netBridge}";
+                }
+
+                // Add SMBIOS settings if requested
+                if (AutomaticSMBIOS.IsPresent)
+                {
+                    var smbios = Models.ProxmoxVMSMBIOSProfile.GetProfile(SMBIOSProfile);
+                    string smbiosString = smbios.ToProxmoxString();
+                    if (!string.IsNullOrEmpty(smbiosString))
+                    {
+                        configParams["smbios"] = smbiosString;
+                        WriteVerbose($"Using automatic SMBIOS settings with profile: {SMBIOSProfile}");
+                    }
+                }
+
+                client.Put($"nodes/{Node}/qemu/{vmId.Value}/config", configParams);
             }
 
             // Assign IP if pool is specified
@@ -262,7 +303,7 @@ namespace PSProxmox.Cmdlets
             {
                 WriteVerbose($"Starting VM {vmName}");
                 client.Post($"nodes/{Node}/qemu/{vmId.Value}/status/start", null);
-                
+
                 // Refresh VM status
                 vmResponse = client.Get($"nodes/{Node}/qemu/{vmId.Value}/status/current");
                 vm = JsonUtility.DeserializeResponse<ProxmoxVM>(vmResponse);

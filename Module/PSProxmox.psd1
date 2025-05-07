@@ -1,7 +1,7 @@
 @{
     RootModule = 'PSProxmox.psm1'
     NestedModules = @('bin\PSProxmox.dll')
-    ModuleVersion = '2025.05.07.1046'
+    ModuleVersion = '2025.05.07.1111'
     GUID = 'd24f0894-3d0c-4ef1-a41e-b273c3db86ad'
     Author = 'PSProxmox Team'
     CompanyName = 'PSProxmox'
@@ -88,6 +88,9 @@
         }
     }
 }
+
+
+
 
 
 

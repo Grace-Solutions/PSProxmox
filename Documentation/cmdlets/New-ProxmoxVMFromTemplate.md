@@ -19,6 +19,8 @@ New-ProxmoxVMFromTemplate
    [-NetworkBridge <String>]
    [-Description <String>]
    [-IPPool <String>]
+   [-AutomaticSMBIOS]
+   [-SMBIOSProfile <String>]
    [-Start]
    [<CommonParameters>]
 ```
@@ -31,6 +33,7 @@ New-ProxmoxVMFromTemplate
    -Prefix <String>
    -Count <Int32>
    [-StartIndex <Int32>]
+   [-CounterDigits <Int32>]
    [-Memory <Int32>]
    [-Cores <Int32>]
    [-DiskSize <Int32>]
@@ -39,6 +42,8 @@ New-ProxmoxVMFromTemplate
    [-NetworkBridge <String>]
    [-Description <String>]
    [-IPPool <String>]
+   [-AutomaticSMBIOS]
+   [-SMBIOSProfile <String>]
    [-Start]
    [<CommonParameters>]
 ```
@@ -148,6 +153,22 @@ Accept wildcard characters: False
 ### -StartIndex
 
 The starting index for the VM names when creating multiple VMs.
+
+```yaml
+Type: Int32
+Parameter Sets: MultipleVMs
+Aliases:
+
+Required: False
+Position: Named
+Default value: 1
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -CounterDigits
+
+The number of digits to use for the counter in VM names (e.g., 3 would result in "Prefix-001").
 
 ```yaml
 Type: Int32
@@ -289,6 +310,38 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -AutomaticSMBIOS
+
+Whether to automatically generate SMBIOS values.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -SMBIOSProfile
+
+The manufacturer profile to use for SMBIOS values. Valid values are: Proxmox, Dell, HP, Lenovo, Microsoft, VMware, HyperV, VirtualBox, Random.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: Random
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -IPPool
 
 The IP pool to use for assigning an IP address.
@@ -339,7 +392,10 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 - If the `-VMID` parameter is not specified, the next available ID will be used.
 - If the `-Start` parameter is specified, the VM will be started after creation.
 - If the `-IPPool` parameter is specified, an IP address will be assigned from the specified pool.
-- When creating multiple VMs, the names will be in the format `{Prefix}{StartIndex + i}` where `i` is the index of the VM (0 to Count-1).
+- When creating multiple VMs, the names will be in the format `{Prefix}{FormattedCounter}` where `FormattedCounter` is the counter (StartIndex + i) formatted with the specified number of digits.
+- If the `-CounterDigits` parameter is specified, the counter will be padded with leading zeros to the specified number of digits (e.g., "Prefix-001").
+- If the `-AutomaticSMBIOS` parameter is specified, SMBIOS values will be automatically generated using the specified profile.
+- The `-SMBIOSProfile` parameter specifies the manufacturer profile to use for SMBIOS values. Valid values are: Proxmox, Dell, HP, Lenovo, Microsoft, VMware, HyperV, VirtualBox, Random.
 
 ## Examples
 
@@ -378,6 +434,24 @@ $vm = New-ProxmoxVMFromTemplate -Connection $connection -Node "pve1" -TemplateNa
 ```
 
 This example creates a new VM from the "Ubuntu-Template" template, assigns an IP address from the "Production" pool, and starts it.
+
+### Example 5: Create multiple VMs with padded counters
+
+```powershell
+$connection = Connect-ProxmoxServer -Server "proxmox.example.com" -Credential (Get-Credential)
+$vms = New-ProxmoxVMFromTemplate -Connection $connection -Node "pve1" -TemplateName "Ubuntu-Template" -Prefix "web-" -Count 5 -CounterDigits 3 -Start
+```
+
+This example creates five new VMs from the "Ubuntu-Template" template with names "web-001", "web-002", "web-003", "web-004", and "web-005", and starts them.
+
+### Example 6: Create VMs with automatic SMBIOS settings
+
+```powershell
+$connection = Connect-ProxmoxServer -Server "proxmox.example.com" -Credential (Get-Credential)
+$vms = New-ProxmoxVMFromTemplate -Connection $connection -Node "pve1" -TemplateName "Windows-Template" -Prefix "win-" -Count 3 -AutomaticSMBIOS -SMBIOSProfile "Dell" -Start
+```
+
+This example creates three new VMs from the "Windows-Template" template with Dell SMBIOS settings, which can be useful for software licensing that's tied to hardware identifiers.
 
 ## Related Links
 
