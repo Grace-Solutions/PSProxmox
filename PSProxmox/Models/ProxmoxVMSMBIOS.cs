@@ -54,19 +54,19 @@ namespace PSProxmox.Models
 
             if (!string.IsNullOrEmpty(Manufacturer))
                 parts.Add($"manufacturer={Manufacturer}");
-            
+
             if (!string.IsNullOrEmpty(Product))
                 parts.Add($"product={Product}");
-            
+
             if (!string.IsNullOrEmpty(Version))
                 parts.Add($"version={Version}");
-            
+
             if (!string.IsNullOrEmpty(Serial))
                 parts.Add($"serial={Serial}");
-            
+
             if (!string.IsNullOrEmpty(Family))
                 parts.Add($"family={Family}");
-            
+
             if (!string.IsNullOrEmpty(UUID))
                 parts.Add($"uuid={UUID}");
 
@@ -81,6 +81,10 @@ namespace PSProxmox.Models
         public static ProxmoxVMSMBIOS FromProxmoxString(string smbiosString)
         {
             if (string.IsNullOrEmpty(smbiosString))
+                return new ProxmoxVMSMBIOS();
+
+            // If the string is just "1", it means SMBIOS is enabled but no specific values are set
+            if (smbiosString == "1")
                 return new ProxmoxVMSMBIOS();
 
             var result = new ProxmoxVMSMBIOS();

@@ -119,10 +119,10 @@ namespace PSProxmox.Cmdlets
         public SwitchParameter AutomaticSMBIOS { get; set; }
 
         /// <summary>
-        /// <para type="description">The manufacturer profile to use for SMBIOS values. Valid values are: Proxmox, Dell, HP, Lenovo, VMware, HyperV, VirtualBox, Random.</para>
+        /// <para type="description">The manufacturer profile to use for SMBIOS values. Valid values are: Proxmox, Dell, HP, Lenovo, Microsoft, VMware, HyperV, VirtualBox, Random.</para>
         /// </summary>
         [Parameter(Mandatory = false, ParameterSetName = "Direct")]
-        [ValidateSet("Proxmox", "Dell", "HP", "Lenovo", "VMware", "HyperV", "VirtualBox", "Random")]
+        [ValidateSet("Proxmox", "Dell", "HP", "Lenovo", "Microsoft", "VMware", "HyperV", "VirtualBox", "Random")]
         public string SMBIOSProfile { get; set; } = "Random";
 
         /// <summary>

@@ -87,6 +87,19 @@ namespace PSProxmox.Cmdlets
         public string UUID { get; set; }
 
         /// <summary>
+        /// <para type="description">Whether to use a manufacturer profile for SMBIOS values.</para>
+        /// </summary>
+        [Parameter(Mandatory = false, ParameterSetName = "Profile")]
+        public SwitchParameter UseProfile { get; set; }
+
+        /// <summary>
+        /// <para type="description">The manufacturer profile to use for SMBIOS values. Valid values are: Proxmox, Dell, HP, Lenovo, Microsoft, VMware, HyperV, VirtualBox, Random.</para>
+        /// </summary>
+        [Parameter(Mandatory = true, ParameterSetName = "Profile")]
+        [ValidateSet("Proxmox", "Dell", "HP", "Lenovo", "Microsoft", "VMware", "HyperV", "VirtualBox", "Random")]
+        public string Profile { get; set; }
+
+        /// <summary>
         /// <para type="description">Return the updated SMBIOS settings.</para>
         /// </summary>
         [Parameter(Mandatory = false)]
@@ -103,44 +116,61 @@ namespace PSProxmox.Cmdlets
 
                 // Create SMBIOS settings
                 ProxmoxVMSMBIOS smbiosSettings;
+
+                // Get current settings first (for all parameter sets)
+                string response = client.Get($"nodes/{Node}/qemu/{VMID}/config");
+                var configData = JsonUtility.DeserializeResponse<dynamic>(response);
+
+                string currentSmbiosString = configData.data.smbios;
+                var currentSmbios = string.IsNullOrEmpty(currentSmbiosString)
+                    ? new ProxmoxVMSMBIOS()
+                    : ProxmoxVMSMBIOS.FromProxmoxString(currentSmbiosString);
+
                 if (ParameterSetName == "SMBIOSObject")
                 {
                     smbiosSettings = SMBIOS ?? new ProxmoxVMSMBIOS();
+
+                    // Preserve UUID if it exists and a new one wasn't specified
+                    if (string.IsNullOrEmpty(smbiosSettings.UUID) && !string.IsNullOrEmpty(currentSmbios.UUID))
+                    {
+                        smbiosSettings.UUID = currentSmbios.UUID;
+                        WriteVerbose("Preserved existing UUID from VM configuration");
+                    }
+                }
+                else if (ParameterSetName == "Profile")
+                {
+                    // Use manufacturer profile but preserve existing UUID
+                    smbiosSettings = ProxmoxVMSMBIOSProfile.GetProfile(Profile, currentSmbios);
+                    WriteVerbose($"Using SMBIOS profile: {Profile}");
                 }
                 else
                 {
-                    // Get current settings first
-                    string response = client.Get($"nodes/{Node}/qemu/{VMID}/config");
-                    var configData = JsonUtility.DeserializeResponse<dynamic>(response);
-                    
-                    string currentSmbiosString = configData.data.smbios;
-                    smbiosSettings = string.IsNullOrEmpty(currentSmbiosString) 
-                        ? new ProxmoxVMSMBIOS() 
-                        : ProxmoxVMSMBIOS.FromProxmoxString(currentSmbiosString);
+                    // Start with current settings
+                    smbiosSettings = currentSmbios;
 
                     // Update with provided values
                     if (!string.IsNullOrEmpty(Manufacturer))
                         smbiosSettings.Manufacturer = Manufacturer;
-                    
+
                     if (!string.IsNullOrEmpty(Product))
                         smbiosSettings.Product = Product;
-                    
+
                     if (!string.IsNullOrEmpty(Version))
                         smbiosSettings.Version = Version;
-                    
+
                     if (!string.IsNullOrEmpty(Serial))
                         smbiosSettings.Serial = Serial;
-                    
+
                     if (!string.IsNullOrEmpty(Family))
                         smbiosSettings.Family = Family;
-                    
+
                     if (!string.IsNullOrEmpty(UUID))
                         smbiosSettings.UUID = UUID;
                 }
 
                 // Convert to Proxmox format
                 string smbiosString = smbiosSettings.ToProxmoxString();
-                
+
                 if (string.IsNullOrEmpty(smbiosString))
                 {
                     WriteWarning("No SMBIOS settings specified. No changes will be made.");

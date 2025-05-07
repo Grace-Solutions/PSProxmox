@@ -33,6 +33,19 @@ Set-ProxmoxVMSMBIOS
    [<CommonParameters>]
 ```
 
+```powershell
+Set-ProxmoxVMSMBIOS
+   -Connection <ProxmoxConnection>
+   -Node <String>
+   -VMID <Int32>
+   -UseProfile
+   -Profile <String>
+   [-PassThru]
+   [-WhatIf]
+   [-Confirm]
+   [<CommonParameters>]
+```
+
 ## Description
 
 The `Set-ProxmoxVMSMBIOS` cmdlet sets the SMBIOS (System Management BIOS) settings for a virtual machine in Proxmox VE. SMBIOS settings allow you to customize hardware identification information that's presented to the guest operating system.
@@ -199,6 +212,38 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -UseProfile
+
+Whether to use a manufacturer profile for SMBIOS values.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: Profile
+Aliases:
+
+Required: True
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Profile
+
+The manufacturer profile to use for SMBIOS values. Valid values are: Proxmox, Dell, HP, Lenovo, Microsoft, VMware, HyperV, VirtualBox, Random.
+
+```yaml
+Type: String
+Parameter Sets: Profile
+Aliases:
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -PassThru
 
 Return the updated SMBIOS settings.
@@ -302,6 +347,15 @@ Set-ProxmoxVMSMBIOS -Connection $connection -Node "pve1" -VMID 100 -SMBIOS $smbi
 ```
 
 This example retrieves the current SMBIOS settings for VM 100, modifies them, and then updates the VM with the new settings.
+
+### Example 4: Set SMBIOS settings using a manufacturer profile
+
+```powershell
+$connection = Connect-ProxmoxServer -Server "proxmox.example.com" -Credential (Get-Credential)
+Set-ProxmoxVMSMBIOS -Connection $connection -Node "pve1" -VMID 100 -UseProfile -Profile "Dell" -PassThru
+```
+
+This example sets the SMBIOS settings for VM 100 using the Dell manufacturer profile. The existing UUID will be preserved.
 
 ## Related Links
 

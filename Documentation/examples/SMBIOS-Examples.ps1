@@ -50,8 +50,7 @@ Write-Host "UUID: $($smbios.UUID)"
 Set-ProxmoxVMSMBIOS -Connection $connection -Node "pve1" -VMID 100 -Manufacturer "Lenovo" -Product "ThinkSystem SR650" -Serial "LENOVO123"
 
 # Example 7: Update SMBIOS settings for an existing VM using a manufacturer profile
-$smbios = ProxmoxVMSMBIOSProfile.GetProfile("VMware")
-Set-ProxmoxVMSMBIOS -Connection $connection -Node "pve1" -VMID 101 -SMBIOS $smbios
+Set-ProxmoxVMSMBIOS -Connection $connection -Node "pve1" -VMID 101 -UseProfile -Profile "VMware" -PassThru
 
 # Example 8: Create a VM with SMBIOS settings that mimic a physical server for licensing purposes
 $builder = New-ProxmoxVMBuilder -Name "license-server" -AutomaticSMBIOS -SMBIOSProfile "Dell"
@@ -61,6 +60,15 @@ $builder.WithMemory(8192)
         .WithNetwork("virtio", "vmbr0")
         .WithStart($true)
 $vm5 = New-ProxmoxVM -Connection $connection -Node "pve1" -Builder $builder
+
+# Example 9: Create a VM with Microsoft Surface SMBIOS settings
+$builder = New-ProxmoxVMBuilder -Name "surface-pro" -AutomaticSMBIOS -SMBIOSProfile "Microsoft"
+$builder.WithMemory(4096)
+        .WithCores(2)
+        .WithDisk(50, "local-lvm")
+        .WithNetwork("virtio", "vmbr0")
+        .WithStart($true)
+$vm6 = New-ProxmoxVM -Connection $connection -Node "pve1" -Builder $builder
 
 # Disconnect from the server when done
 Disconnect-ProxmoxServer -Connection $connection
