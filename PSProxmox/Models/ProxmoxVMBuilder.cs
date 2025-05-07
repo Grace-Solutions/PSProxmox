@@ -72,6 +72,11 @@ namespace PSProxmox.Models
         public string IPPool { get; set; }
 
         /// <summary>
+        /// Gets or sets the SMBIOS settings for the VM.
+        /// </summary>
+        public ProxmoxVMSMBIOS SMBIOS { get; set; } = new ProxmoxVMSMBIOS();
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ProxmoxVMBuilder"/> class.
         /// </summary>
         /// <param name="name">The name of the VM.</param>
@@ -342,6 +347,94 @@ namespace PSProxmox.Models
         }
 
         /// <summary>
+        /// Sets the SMBIOS manufacturer for the VM.
+        /// </summary>
+        /// <param name="manufacturer">The manufacturer name.</param>
+        /// <returns>The builder instance.</returns>
+        public ProxmoxVMBuilder WithSMBIOSManufacturer(string manufacturer)
+        {
+            SMBIOS.Manufacturer = manufacturer;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the SMBIOS product name for the VM.
+        /// </summary>
+        /// <param name="product">The product name.</param>
+        /// <returns>The builder instance.</returns>
+        public ProxmoxVMBuilder WithSMBIOSProduct(string product)
+        {
+            SMBIOS.Product = product;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the SMBIOS version for the VM.
+        /// </summary>
+        /// <param name="version">The version.</param>
+        /// <returns>The builder instance.</returns>
+        public ProxmoxVMBuilder WithSMBIOSVersion(string version)
+        {
+            SMBIOS.Version = version;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the SMBIOS serial number for the VM.
+        /// </summary>
+        /// <param name="serial">The serial number.</param>
+        /// <returns>The builder instance.</returns>
+        public ProxmoxVMBuilder WithSMBIOSSerial(string serial)
+        {
+            SMBIOS.Serial = serial;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the SMBIOS family for the VM.
+        /// </summary>
+        /// <param name="family">The family.</param>
+        /// <returns>The builder instance.</returns>
+        public ProxmoxVMBuilder WithSMBIOSFamily(string family)
+        {
+            SMBIOS.Family = family;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the SMBIOS UUID for the VM.
+        /// </summary>
+        /// <param name="uuid">The UUID.</param>
+        /// <returns>The builder instance.</returns>
+        public ProxmoxVMBuilder WithSMBIOSUUID(string uuid)
+        {
+            SMBIOS.UUID = uuid;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets all SMBIOS settings for the VM at once.
+        /// </summary>
+        /// <param name="smbios">The SMBIOS settings.</param>
+        /// <returns>The builder instance.</returns>
+        public ProxmoxVMBuilder WithSMBIOS(ProxmoxVMSMBIOS smbios)
+        {
+            SMBIOS = smbios ?? new ProxmoxVMSMBIOS();
+            return this;
+        }
+
+        /// <summary>
+        /// Sets SMBIOS settings based on a manufacturer profile.
+        /// </summary>
+        /// <param name="manufacturer">The manufacturer profile to use.</param>
+        /// <returns>The builder instance.</returns>
+        public ProxmoxVMBuilder WithSMBIOSProfile(string manufacturer)
+        {
+            SMBIOS = ProxmoxVMSMBIOSProfile.GetProfile(manufacturer);
+            return this;
+        }
+
+        /// <summary>
         /// Builds the VM configuration parameters.
         /// </summary>
         /// <returns>The VM configuration parameters.</returns>
@@ -364,6 +457,13 @@ namespace PSProxmox.Models
             if (!string.IsNullOrEmpty(Tags))
             {
                 parameters["tags"] = Tags;
+            }
+
+            // Add SMBIOS settings if any are specified
+            string smbiosString = SMBIOS.ToProxmoxString();
+            if (!string.IsNullOrEmpty(smbiosString))
+            {
+                parameters["smbios"] = smbiosString;
             }
 
             // Add network interfaces

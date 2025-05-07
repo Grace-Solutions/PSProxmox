@@ -113,6 +113,19 @@ namespace PSProxmox.Cmdlets
         public string IPPool { get; set; }
 
         /// <summary>
+        /// <para type="description">Whether to automatically generate SMBIOS values.</para>
+        /// </summary>
+        [Parameter(Mandatory = false, ParameterSetName = "Direct")]
+        public SwitchParameter AutomaticSMBIOS { get; set; }
+
+        /// <summary>
+        /// <para type="description">The manufacturer profile to use for SMBIOS values. Valid values are: Proxmox, Dell, HP, Lenovo, VMware, HyperV, VirtualBox, Random.</para>
+        /// </summary>
+        [Parameter(Mandatory = false, ParameterSetName = "Direct")]
+        [ValidateSet("Proxmox", "Dell", "HP", "Lenovo", "VMware", "HyperV", "VirtualBox", "Random")]
+        public string SMBIOSProfile { get; set; } = "Random";
+
+        /// <summary>
         /// Processes the cmdlet.
         /// </summary>
         protected override void ProcessRecord()
@@ -179,6 +192,18 @@ namespace PSProxmox.Cmdlets
 
                     // Add disk
                     parameters["ide0"] = $"{Storage}:{DiskSize}";
+
+                    // Add SMBIOS settings if requested
+                    if (AutomaticSMBIOS.IsPresent)
+                    {
+                        var smbios = ProxmoxVMSMBIOSProfile.GetProfile(SMBIOSProfile);
+                        string smbiosString = smbios.ToProxmoxString();
+                        if (!string.IsNullOrEmpty(smbiosString))
+                        {
+                            parameters["smbios"] = smbiosString;
+                            WriteVerbose($"Using automatic SMBIOS settings with profile: {SMBIOSProfile}");
+                        }
+                    }
 
                     vmid = VMID.Value;
                     vmName = Name;

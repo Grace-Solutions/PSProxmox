@@ -93,6 +93,55 @@ namespace PSProxmox.Cmdlets
         public string IPPool { get; set; }
 
         /// <summary>
+        /// <para type="description">The SMBIOS manufacturer information.</para>
+        /// </summary>
+        [Parameter(Mandatory = false)]
+        public string SMBIOSManufacturer { get; set; }
+
+        /// <summary>
+        /// <para type="description">The SMBIOS product information.</para>
+        /// </summary>
+        [Parameter(Mandatory = false)]
+        public string SMBIOSProduct { get; set; }
+
+        /// <summary>
+        /// <para type="description">The SMBIOS version information.</para>
+        /// </summary>
+        [Parameter(Mandatory = false)]
+        public string SMBIOSVersion { get; set; }
+
+        /// <summary>
+        /// <para type="description">The SMBIOS serial number.</para>
+        /// </summary>
+        [Parameter(Mandatory = false)]
+        public string SMBIOSSerial { get; set; }
+
+        /// <summary>
+        /// <para type="description">The SMBIOS family information.</para>
+        /// </summary>
+        [Parameter(Mandatory = false)]
+        public string SMBIOSFamily { get; set; }
+
+        /// <summary>
+        /// <para type="description">The SMBIOS UUID.</para>
+        /// </summary>
+        [Parameter(Mandatory = false)]
+        public string SMBIOSUUID { get; set; }
+
+        /// <summary>
+        /// <para type="description">Whether to automatically generate SMBIOS values.</para>
+        /// </summary>
+        [Parameter(Mandatory = false)]
+        public SwitchParameter AutomaticSMBIOS { get; set; }
+
+        /// <summary>
+        /// <para type="description">The manufacturer profile to use for SMBIOS values. Valid values are: Proxmox, Dell, HP, Lenovo, VMware, HyperV, VirtualBox, Random.</para>
+        /// </summary>
+        [Parameter(Mandatory = false)]
+        [ValidateSet("Proxmox", "Dell", "HP", "Lenovo", "VMware", "HyperV", "VirtualBox", "Random")]
+        public string SMBIOSProfile { get; set; } = "Random";
+
+        /// <summary>
         /// Processes the cmdlet.
         /// </summary>
         protected override void ProcessRecord()
@@ -127,6 +176,47 @@ namespace PSProxmox.Cmdlets
                 if (Tags != null && Tags.Length > 0)
                 {
                     builder.WithTags(Tags);
+                }
+
+                // Set SMBIOS settings based on parameters
+                if (AutomaticSMBIOS.IsPresent)
+                {
+                    // Use the specified profile or Random if not specified
+                    builder.WithSMBIOSProfile(SMBIOSProfile);
+                    WriteVerbose($"Using automatic SMBIOS settings with profile: {SMBIOSProfile}");
+                }
+                else
+                {
+                    // Set individual SMBIOS settings if provided
+                    if (!string.IsNullOrEmpty(SMBIOSManufacturer))
+                    {
+                        builder.WithSMBIOSManufacturer(SMBIOSManufacturer);
+                    }
+
+                    if (!string.IsNullOrEmpty(SMBIOSProduct))
+                    {
+                        builder.WithSMBIOSProduct(SMBIOSProduct);
+                    }
+
+                    if (!string.IsNullOrEmpty(SMBIOSVersion))
+                    {
+                        builder.WithSMBIOSVersion(SMBIOSVersion);
+                    }
+
+                    if (!string.IsNullOrEmpty(SMBIOSSerial))
+                    {
+                        builder.WithSMBIOSSerial(SMBIOSSerial);
+                    }
+
+                    if (!string.IsNullOrEmpty(SMBIOSFamily))
+                    {
+                        builder.WithSMBIOSFamily(SMBIOSFamily);
+                    }
+
+                    if (!string.IsNullOrEmpty(SMBIOSUUID))
+                    {
+                        builder.WithSMBIOSUUID(SMBIOSUUID);
+                    }
                 }
 
                 WriteObject(builder);
