@@ -5,8 +5,12 @@
 $scriptRoot = $PSScriptRoot
 $rootPath = Split-Path -Parent $scriptRoot
 
-# Set the version based on the current date and time
-$version = Get-Date -Format "yyyy.MM.dd.HHmm"
+# Set the version based on the environment variable or current date and time
+if ($env:MODULE_VERSION) {
+    $version = $env:MODULE_VERSION
+} else {
+    $version = Get-Date -Format "yyyy.MM.dd.HHmm"
+}
 Write-Host "Building PSProxmox version $version"
 
 # Update the module version in the PSD1 file

@@ -4,13 +4,14 @@
 param(
     [Parameter(Mandatory = $true)]
     [string]$ApiKey,
-    
+
     [Parameter(Mandatory = $false)]
     [string]$Version = (Get-Date -Format "yyyy.MM.dd.HHmm")
 )
 
 # Ensure the module is built
-Write-Host "Building the module..."
+Write-Host "Building the module with version $Version..."
+$env:MODULE_VERSION = $Version
 & "$PSScriptRoot\build-release-only.ps1"
 
 # Get the release directory
