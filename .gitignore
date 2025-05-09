@@ -9,6 +9,10 @@ obj/
 *.userosscache
 *.sln.docstates
 
+# Exception for Module lib directory
+!Module/lib/
+!Module/lib/**/*.dll
+
 # Visual Studio files
 .vs/
 *.nupkg
@@ -46,9 +50,10 @@ PSProxmox/[Oo]bj/
 *.tar.gz
 *.tgz
 
-# Module bin folder (except the DLL)
+# Module bin folder (except the DLL and Newtonsoft.Json.dll)
 Module/bin/*
 !Module/bin/PSProxmox.dll
+!Module/bin/Newtonsoft.Json.dll
 
 # PowerShell module artifacts
 *.psm1
