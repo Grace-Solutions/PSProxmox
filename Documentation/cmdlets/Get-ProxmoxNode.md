@@ -1,14 +1,12 @@
-# Get-ProxmoxVM
+# Get-ProxmoxNode
 
-Gets virtual machines from Proxmox VE.
+Gets nodes from a Proxmox VE cluster.
 
 ## Syntax
 
 ```powershell
-Get-ProxmoxVM
+Get-ProxmoxNode
    [-Connection <ProxmoxConnection>]
-   [-Node <String>]
-   [-VMID <Int32>]
    [-Name <String>]
    [-UseRegex]
    [-RawJson]
@@ -17,7 +15,7 @@ Get-ProxmoxVM
 
 ## Description
 
-The `Get-ProxmoxVM` cmdlet retrieves virtual machines from Proxmox VE. You can retrieve all VMs, VMs on a specific node, or a specific VM by ID.
+The `Get-ProxmoxNode` cmdlet retrieves nodes from a Proxmox VE cluster. You can retrieve all nodes or a specific node by name.
 
 ## Parameters
 
@@ -37,41 +35,9 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Node
-
-The node to get VMs from. If not specified, VMs from all nodes will be returned.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -VMID
-
-The ID of the VM to get. If not specified, all VMs will be returned.
-
-```yaml
-Type: Int32
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -Name
 
-The name of the virtual machine to retrieve. Supports wildcards and regex when used with -UseRegex.
+The name of the node to retrieve. Supports wildcards and regex when used with -UseRegex.
 
 ```yaml
 Type: String
@@ -79,7 +45,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 2
+Position: 1
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: True
@@ -127,7 +93,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## Outputs
 
-### PSProxmox.Models.ProxmoxVM
+### PSProxmox.Models.ProxmoxNode
 
 ### System.String
 
@@ -136,71 +102,58 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 - This cmdlet requires a connection to a Proxmox VE server. Use `Connect-ProxmoxServer` to establish a connection.
 - If no connection is specified, the cmdlet will use the default connection.
 - If the `-RawJson` parameter is specified, the raw JSON response will be returned instead of parsed objects.
-- If the `-VMID` parameter is specified and the VM is not found, an error will be thrown.
-- The `-Name` parameter supports wildcards (e.g., "web*") by default.
-- Use the `-UseRegex` parameter with `-Name` to filter using regular expressions (e.g., "^web[0-9]+$").
+- If the `-Name` parameter is specified and the node is not found, an error will be thrown.
+- The `-Name` parameter supports wildcards (e.g., "pve*") by default.
+- Use the `-UseRegex` parameter with `-Name` to filter using regular expressions (e.g., "^pve[0-9]+$").
 
 ## Examples
 
-### Example 1: Get all VMs
+### Example 1: Get all nodes
 
 ```powershell
 Connect-ProxmoxServer -Server "proxmox.example.com" -Credential (Get-Credential)
-$vms = Get-ProxmoxVM
+$nodes = Get-ProxmoxNode
 ```
 
-This example gets all VMs from all nodes.
+This example gets all nodes from the Proxmox VE cluster.
 
-### Example 2: Get VMs on a specific node
+### Example 2: Get a specific node by name
 
 ```powershell
 Connect-ProxmoxServer -Server "proxmox.example.com" -Credential (Get-Credential)
-$vms = Get-ProxmoxVM -Node "pve1"
+$node = Get-ProxmoxNode -Name "pve1"
 ```
 
-This example gets all VMs on the node "pve1".
+This example gets the node named "pve1".
 
-### Example 3: Get a specific VM by ID
+### Example 3: Get nodes by name using wildcards
 
 ```powershell
 Connect-ProxmoxServer -Server "proxmox.example.com" -Credential (Get-Credential)
-$vm = Get-ProxmoxVM -VMID 100
+$nodes = Get-ProxmoxNode -Name "pve*"
 ```
 
-This example gets the VM with ID 100.
+This example gets all nodes with names starting with "pve".
 
-### Example 4: Get VMs by name using wildcards
+### Example 4: Get nodes by name using regex
 
 ```powershell
 Connect-ProxmoxServer -Server "proxmox.example.com" -Credential (Get-Credential)
-$vms = Get-ProxmoxVM -Name "web*"
+$nodes = Get-ProxmoxNode -Name "^pve[0-9]+$" -UseRegex
 ```
 
-This example gets all VMs with names starting with "web".
+This example gets all nodes with names matching the pattern "pve" followed by one or more digits.
 
-### Example 5: Get VMs by name using regex
+### Example 5: Get the raw JSON response
 
 ```powershell
 Connect-ProxmoxServer -Server "proxmox.example.com" -Credential (Get-Credential)
-$vms = Get-ProxmoxVM -Name "^web[0-9]+$" -UseRegex
+$json = Get-ProxmoxNode -RawJson
 ```
 
-This example gets all VMs with names matching the pattern "web" followed by one or more digits.
-
-### Example 6: Get the raw JSON response
-
-```powershell
-Connect-ProxmoxServer -Server "proxmox.example.com" -Credential (Get-Credential)
-$json = Get-ProxmoxVM -RawJson
-```
-
-This example gets the raw JSON response for all VMs.
+This example gets the raw JSON response for all nodes.
 
 ## Related Links
 
 - [Connect-ProxmoxServer](Connect-ProxmoxServer.md)
-- [New-ProxmoxVM](New-ProxmoxVM.md)
-- [Remove-ProxmoxVM](Remove-ProxmoxVM.md)
-- [Start-ProxmoxVM](Start-ProxmoxVM.md)
-- [Stop-ProxmoxVM](Stop-ProxmoxVM.md)
-- [Restart-ProxmoxVM](Restart-ProxmoxVM.md)
+- [Get-ProxmoxVM](Get-ProxmoxVM.md)

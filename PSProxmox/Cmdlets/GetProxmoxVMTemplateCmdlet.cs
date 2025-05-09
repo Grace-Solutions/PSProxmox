@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Management.Automation;
 using PSProxmox.Models;
 using PSProxmox.Templates;
@@ -20,10 +21,10 @@ namespace PSProxmox.Cmdlets
     /// </summary>
     [Cmdlet(VerbsCommon.Get, "ProxmoxVMTemplate")]
     [OutputType(typeof(ProxmoxVMTemplate))]
-    public class GetProxmoxVMTemplateCmdlet : PSCmdlet
+    public class GetProxmoxVMTemplateCmdlet : FilteringCmdlet
     {
         /// <summary>
-        /// <para type="description">The name of the template to retrieve.</para>
+        /// <para type="description">The name of the template to retrieve. Supports wildcards and regex when used with -UseRegex.</para>
         /// </summary>
         [Parameter(Mandatory = false, Position = 0)]
         public string Name { get; set; }
@@ -35,7 +36,7 @@ namespace PSProxmox.Cmdlets
         {
             try
             {
-                if (string.IsNullOrEmpty(Name))
+                if (string.IsNullOrEmpty(Name) || UseRegex.IsPresent || Name.Contains("*") || Name.Contains("?"))
                 {
                     // Get all templates
                     var templates = new List<ProxmoxVMTemplate>();
@@ -43,6 +44,13 @@ namespace PSProxmox.Cmdlets
                     {
                         templates.Add(template);
                     }
+
+                    // Apply name filtering if specified
+                    if (!string.IsNullOrEmpty(Name))
+                    {
+                        templates = FilterByProperty(templates, "Name", Name).ToList();
+                    }
+
                     WriteObject(templates, true);
                 }
                 else

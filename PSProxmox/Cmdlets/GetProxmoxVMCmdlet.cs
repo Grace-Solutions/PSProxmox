@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Management.Automation;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -28,7 +29,7 @@ namespace PSProxmox.Cmdlets
     /// </summary>
     [Cmdlet(VerbsCommon.Get, "ProxmoxVM")]
     [OutputType(typeof(ProxmoxVM), typeof(string))]
-    public class GetProxmoxVMCmdlet : ProxmoxCmdlet
+    public class GetProxmoxVMCmdlet : FilteringCmdlet
     {
 
         /// <summary>
@@ -42,6 +43,12 @@ namespace PSProxmox.Cmdlets
         /// </summary>
         [Parameter(Mandatory = false)]
         public string Node { get; set; }
+
+        /// <summary>
+        /// <para type="description">The name of the virtual machine to retrieve. Supports wildcards and regex when used with -UseRegex.</para>
+        /// </summary>
+        [Parameter(Mandatory = false, Position = 2)]
+        public string Name { get; set; }
 
         /// <summary>
         /// <para type="description">Whether to return the raw JSON response.</para>
@@ -154,6 +161,12 @@ namespace PSProxmox.Cmdlets
                             }
                         }
 
+                        // Apply name filtering if specified
+                        if (!string.IsNullOrEmpty(Name))
+                        {
+                            allVMs = FilterByProperty(allVMs, "Name", Name).ToList();
+                        }
+
                         if (RawJson.IsPresent)
                         {
                             WriteObject(JsonConvert.SerializeObject(allVMs));
@@ -175,6 +188,12 @@ namespace PSProxmox.Cmdlets
                             var vm = vmObj.ToObject<ProxmoxVM>();
                             vm.Node = Node;
                             nodeVMs.Add(vm);
+                        }
+
+                        // Apply name filtering if specified
+                        if (!string.IsNullOrEmpty(Name))
+                        {
+                            nodeVMs = FilterByProperty(nodeVMs, "Name", Name).ToList();
                         }
 
                         if (RawJson.IsPresent)

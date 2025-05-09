@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Management.Automation;
 using PSProxmox.IPAM;
 using PSProxmox.Models;
@@ -20,12 +21,12 @@ namespace PSProxmox.Cmdlets
     /// </summary>
     [Cmdlet(VerbsCommon.Get, "ProxmoxIPPool")]
     [OutputType(typeof(ProxmoxIPPool))]
-    public class GetProxmoxIPPoolCmdlet : PSCmdlet
+    public class GetProxmoxIPPoolCmdlet : FilteringCmdlet
     {
         private static readonly IPAMManager _ipamManager = new IPAMManager();
 
         /// <summary>
-        /// <para type="description">The name of the IP pool to retrieve.</para>
+        /// <para type="description">The name of the IP pool to retrieve. Supports wildcards and regex when used with -UseRegex.</para>
         /// </summary>
         [Parameter(Mandatory = false, Position = 0)]
         public string Name { get; set; }
@@ -37,7 +38,7 @@ namespace PSProxmox.Cmdlets
         {
             try
             {
-                if (string.IsNullOrEmpty(Name))
+                if (string.IsNullOrEmpty(Name) || UseRegex.IsPresent || Name.Contains("*") || Name.Contains("?"))
                 {
                     // Get all pools
                     var pools = new List<ProxmoxIPPool>();
@@ -45,6 +46,13 @@ namespace PSProxmox.Cmdlets
                     {
                         pools.Add(ProxmoxIPPool.FromIPPool(pool));
                     }
+
+                    // Apply name filtering if specified
+                    if (!string.IsNullOrEmpty(Name))
+                    {
+                        pools = FilterByProperty(pools, "Name", Name).ToList();
+                    }
+
                     WriteObject(pools, true);
                 }
                 else

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Management.Automation;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -24,7 +25,7 @@ namespace PSProxmox.Cmdlets
     /// </summary>
     [Cmdlet(VerbsCommon.Get, "ProxmoxNode")]
     [OutputType(typeof(ProxmoxNode), typeof(string))]
-    public class GetProxmoxNodeCmdlet : PSCmdlet
+    public class GetProxmoxNodeCmdlet : FilteringCmdlet
     {
         /// <summary>
         /// <para type="description">The connection to the Proxmox VE server.</para>
@@ -33,7 +34,7 @@ namespace PSProxmox.Cmdlets
         public ProxmoxConnection Connection { get; set; }
 
         /// <summary>
-        /// <para type="description">The name of the node to retrieve.</para>
+        /// <para type="description">The name of the node to retrieve. Supports wildcards and regex when used with -UseRegex.</para>
         /// </summary>
         [Parameter(Mandatory = false)]
         public string Name { get; set; }
@@ -54,7 +55,7 @@ namespace PSProxmox.Cmdlets
                 var client = new ProxmoxApiClient(Connection, this);
                 string response;
 
-                if (string.IsNullOrEmpty(Name))
+                if (string.IsNullOrEmpty(Name) || UseRegex.IsPresent || Name.Contains("*") || Name.Contains("?"))
                 {
                     // Get all nodes
                     response = client.Get("nodes");
@@ -65,6 +66,12 @@ namespace PSProxmox.Cmdlets
                     {
                         var node = nodeObj.ToObject<ProxmoxNode>();
                         nodes.Add(node);
+                    }
+
+                    // Apply name filtering if specified
+                    if (!string.IsNullOrEmpty(Name))
+                    {
+                        nodes = FilterByProperty(nodes, "Name", Name).ToList();
                     }
 
                     if (RawJson.IsPresent)
