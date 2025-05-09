@@ -32,6 +32,8 @@
     <Compile Include="Cmdlets\ClearProxmoxIPPoolCmdlet.cs" />
     <Compile Include="Cmdlets\ConnectProxmoxServerCmdlet.cs" />
     <Compile Include="Cmdlets\DisconnectProxmoxServerCmdlet.cs" />
+    <Compile Include="Cmdlets\FilteringCmdlet.cs" />
+    <Compile Include="Cmdlets\ProxmoxCmdlet.cs" />
     <Compile Include="Cmdlets\GetProxmoxClusterBackupCmdlet.cs" />
     <Compile Include="Cmdlets\GetProxmoxClusterCmdlet.cs" />
     <Compile Include="Cmdlets\GetProxmoxIPPoolCmdlet.cs" />
@@ -70,6 +72,7 @@
     <Compile Include="Cmdlets\RestoreProxmoxClusterBackupCmdlet.cs" />
     <Compile Include="Cmdlets\StartProxmoxVMCmdlet.cs" />
     <Compile Include="Cmdlets\StopProxmoxVMCmdlet.cs" />
+    <Compile Include="Cmdlets\TestProxmoxConnectionCmdlet.cs" />
     <Compile Include="IPAM\IPAMManager.cs" />
     <Compile Include="Models\ProxmoxCluster.cs" />
     <Compile Include="Models\ProxmoxClusterBackup.cs" />
@@ -86,6 +89,8 @@
     <Compile Include="Models\ProxmoxUser.cs" />
     <Compile Include="Models\ProxmoxVM.cs" />
     <Compile Include="Models\ProxmoxVMBuilder.cs" />
+    <Compile Include="Models\ProxmoxVMSMBIOS.cs" />
+    <Compile Include="Models\ProxmoxVMSMBIOSProfile.cs" />
     <Compile Include="Models\ProxmoxVMTemplate.cs" />
     <Compile Include="Session\ProxmoxConnection.cs" />
     <Compile Include="Session\ProxmoxSession.cs" />
