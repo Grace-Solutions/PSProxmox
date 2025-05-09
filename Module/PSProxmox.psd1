@@ -1,5 +1,5 @@
 @{
-    ModuleVersion = '2025.05.10.1400'
+    ModuleVersion = '2025.05.10.1500'
     GUID = 'd24f0894-3d0c-4ef1-a41e-b273c3db86ad'
     Author = 'PSProxmox Team'
     CompanyName = 'PSProxmox'
@@ -92,10 +92,12 @@
             Tags = @('Proxmox', 'VirtualMachine', 'Cluster', 'Management')
             LicenseUri = 'https://github.com/Grace-Solutions/PSProxmox/blob/main/LICENSE'
             ProjectUri = 'https://github.com/Grace-Solutions/PSProxmox'
-            ReleaseNotes = 'Moved repository to Grace-Solutions organization. Added regex and wildcard filtering to Get-* cmdlets. See https://github.com/Grace-Solutions/PSProxmox/releases/tag/v2025.05.10.1400'
+            ReleaseNotes = 'Added cloud image template functionality. See https://github.com/Grace-Solutions/PSProxmox/releases/tag/v2025.05.10.1500'
         }
     }
 }
+
+
 
 
 

@@ -5,15 +5,16 @@
 $scriptRoot = $PSScriptRoot
 $rootPath = Split-Path -Parent $scriptRoot
 
-# Set the version based on the current date and time
-$version = Get-Date -Format "yyyy.MM.dd.HHmm"
-Write-Host "Building PSProxmox version $version"
-
-# Update the module version in the PSD1 file
+# Get the version from the module manifest
 $psd1Path = "$rootPath\Module\PSProxmox.psd1"
 $psd1Content = Get-Content -Path $psd1Path -Raw
-$psd1Content = $psd1Content -replace "ModuleVersion = '.*'", "ModuleVersion = '$version'"
-Set-Content -Path $psd1Path -Value $psd1Content
+if ($psd1Content -match "ModuleVersion\s*=\s*'([^']+)'") {
+    $version = $matches[1]
+} else {
+    # Fallback to current date and time if version not found in manifest
+    $version = Get-Date -Format "yyyy.MM.dd.HHmm"
+}
+Write-Host "Building PSProxmox version $version"
 
 # Create the release directory structure
 $releaseBaseDir = "$rootPath\Release"
@@ -39,7 +40,6 @@ dotnet build "$rootPath\PSProxmox\PSProxmox.Main.csproj" -c Release -o $releaseB
 
 # Copy the module files to the release directory
 Copy-Item -Path "$rootPath\Module\PSProxmox.psd1" -Destination $releaseVersionDir -Force
-Copy-Item -Path "$rootPath\Module\PSProxmox.psm1" -Destination $releaseVersionDir -Force
 Copy-Item -Path "$rootPath\LICENSE" -Destination $releaseVersionDir -Force
 Copy-Item -Path "$rootPath\README.md" -Destination $releaseVersionDir -Force
 Copy-Item -Path "$scriptRoot\Install-PSProxmox.ps1" -Destination $releaseVersionDir -Force
