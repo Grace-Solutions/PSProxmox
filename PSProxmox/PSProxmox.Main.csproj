@@ -46,6 +46,8 @@
     <Compile Include="Cmdlets\GetProxmoxUserCmdlet.cs" />
     <Compile Include="Cmdlets\GetProxmoxVMCmdlet.cs" />
     <Compile Include="Cmdlets\GetProxmoxVMTemplateCmdlet.cs" />
+    <Compile Include="Cmdlets\GetProxmoxCloudImageCmdlet.cs" />
+    <Compile Include="Cmdlets\InvokeProxmoxCloudImageCustomizationCmdlet.cs" />
     <Compile Include="Cmdlets\JoinProxmoxClusterCmdlet.cs" />
     <Compile Include="Cmdlets\LeaveProxmoxClusterCmdlet.cs" />
     <Compile Include="Cmdlets\NewProxmoxClusterBackupCmdlet.cs" />
@@ -60,6 +62,9 @@
     <Compile Include="Cmdlets\NewProxmoxVMCmdlet.cs" />
     <Compile Include="Cmdlets\NewProxmoxVMFromTemplateCmdlet.cs" />
     <Compile Include="Cmdlets\NewProxmoxVMTemplateCmdlet.cs" />
+    <Compile Include="Cmdlets\NewProxmoxCloudImageTemplateCmdlet.cs" />
+    <Compile Include="Cmdlets\SaveProxmoxCloudImageCmdlet.cs" />
+    <Compile Include="Cmdlets\SetProxmoxVMCloudInitCmdlet.cs" />
     <Compile Include="Cmdlets\RemoveProxmoxNetworkCmdlet.cs" />
     <Compile Include="Cmdlets\RemoveProxmoxRoleCmdlet.cs" />
     <Compile Include="Cmdlets\RemoveProxmoxSDNVnetCmdlet.cs" />
@@ -73,6 +78,9 @@
     <Compile Include="Cmdlets\StartProxmoxVMCmdlet.cs" />
     <Compile Include="Cmdlets\StopProxmoxVMCmdlet.cs" />
     <Compile Include="Cmdlets\TestProxmoxConnectionCmdlet.cs" />
+    <Compile Include="CloudImages\CloudImageRepository.cs" />
+    <Compile Include="CloudImages\CloudImageDownloader.cs" />
+    <Compile Include="CloudImages\CloudImageCustomizer.cs" />
     <Compile Include="IPAM\IPAMManager.cs" />
     <Compile Include="Models\ProxmoxCluster.cs" />
     <Compile Include="Models\ProxmoxClusterBackup.cs" />

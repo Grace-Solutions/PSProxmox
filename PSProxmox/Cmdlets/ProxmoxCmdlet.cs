@@ -1,5 +1,6 @@
 using System;
 using System.Management.Automation;
+using PSProxmox.Client;
 using PSProxmox.Session;
 
 namespace PSProxmox.Cmdlets
@@ -56,6 +57,18 @@ namespace PSProxmox.Cmdlets
                     "The connection is not authenticated. Use Connect-ProxmoxServer first.",
                     nameof(connection));
             }
+        }
+
+        /// <summary>
+        /// Gets a Proxmox API client for the specified connection.
+        /// </summary>
+        /// <param name="connection">The connection to use. If null, the default connection will be used.</param>
+        /// <returns>A Proxmox API client.</returns>
+        protected ProxmoxApiClient GetProxmoxClient(ProxmoxConnection connection = null)
+        {
+            var conn = connection ?? GetConnection();
+            ValidateConnection(conn);
+            return new ProxmoxApiClient(conn, this);
         }
     }
 }
