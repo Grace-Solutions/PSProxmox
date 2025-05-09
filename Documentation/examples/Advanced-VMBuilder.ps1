@@ -6,7 +6,7 @@ Import-Module PSProxmox
 
 # Connect to the Proxmox VE server
 $credential = Get-Credential -Message "Enter your Proxmox VE credentials"
-$connection = Connect-ProxmoxServer -Server "proxmox.example.com" -Credential $credential -Realm "pam"
+Connect-ProxmoxServer -Server "proxmox.example.com" -Credential $credential -Realm "pam"
 
 # Create a VM builder
 $builder = New-ProxmoxVMBuilder -Name "web-server"
@@ -21,8 +21,8 @@ $builder.WithMemory(4096)                                # 4 GB of memory
         .WithDescription("Web server for production")     # Description
         .WithStart($true)                                # Start the VM after creation
 
-# Create the VM using the builder
-$vm = New-ProxmoxVM -Connection $connection -Node "pve1" -Builder $builder
+# Create the VM using the builder (uses the default connection automatically)
+$vm = New-ProxmoxVM -Node "pve1" -Builder $builder
 
 # Display the VM information
 $vm
@@ -46,10 +46,11 @@ $builder.WithMemory(8192)                                # 8 GB of memory
         .WithStart($true)                                # Start the VM after creation
 
 # Create the VM using the builder
-$vm = New-ProxmoxVM -Connection $connection -Node "pve1" -Builder $builder
+$vm = New-ProxmoxVM -Node "pve1" -Builder $builder
 
 # Display the VM information
 $vm
 
-# Disconnect from the server when done
+# Get the current connection and disconnect from the server when done
+$connection = Test-ProxmoxConnection -Detailed
 Disconnect-ProxmoxServer -Connection $connection

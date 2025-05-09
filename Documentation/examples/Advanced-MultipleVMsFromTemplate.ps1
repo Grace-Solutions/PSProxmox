@@ -6,17 +6,17 @@ Import-Module PSProxmox
 
 # Connect to the Proxmox VE server
 $credential = Get-Credential -Message "Enter your Proxmox VE credentials"
-$connection = Connect-ProxmoxServer -Server "proxmox.example.com" -Credential $credential -Realm "pam"
+Connect-ProxmoxServer -Server "proxmox.example.com" -Credential $credential -Realm "pam"
 
 # Method 1: Create multiple VMs from a template with default settings
-$vms = New-ProxmoxVMFromTemplate -Connection $connection -Node "pve1" -TemplateName "Ubuntu-Template" `
+$vms = New-ProxmoxVMFromTemplate -Node "pve1" -TemplateName "Ubuntu-Template" `
     -Prefix "web" -Count 3 -Start
 
 # Display the VM information
 $vms
 
 # Method 2: Create multiple VMs from a template with custom settings
-$vms = New-ProxmoxVMFromTemplate -Connection $connection -Node "pve1" -TemplateName "Ubuntu-Template" `
+$vms = New-ProxmoxVMFromTemplate -Node "pve1" -TemplateName "Ubuntu-Template" `
     -Prefix "db" -Count 2 -StartIndex 1 -Memory 4096 -Cores 2 -DiskSize 50 -Start
 
 # Display the VM information
@@ -29,11 +29,12 @@ if (-not (Get-ProxmoxIPPool -Name "Production")) {
 }
 
 # Create the VMs with IP addresses from the pool
-$vms = New-ProxmoxVMFromTemplate -Connection $connection -Node "pve1" -TemplateName "Ubuntu-Template" `
+$vms = New-ProxmoxVMFromTemplate -Node "pve1" -TemplateName "Ubuntu-Template" `
     -Prefix "app" -Count 5 -IPPool "Production" -Start
 
 # Display the VM information
 $vms
 
-# Disconnect from the server when done
+# Get the current connection and disconnect from the server when done
+$connection = Test-ProxmoxConnection -Detailed
 Disconnect-ProxmoxServer -Connection $connection

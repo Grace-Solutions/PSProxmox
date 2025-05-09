@@ -1,7 +1,7 @@
 @{
     RootModule = 'PSProxmox.psm1'
     NestedModules = @('bin\PSProxmox.dll')
-    ModuleVersion = '2025.05.09.1245'
+    ModuleVersion = '2025.05.10.1000'
     GUID = 'd24f0894-3d0c-4ef1-a41e-b273c3db86ad'
     Author = 'PSProxmox Team'
     CompanyName = 'PSProxmox'
@@ -85,7 +85,7 @@
             Tags = @('Proxmox', 'VirtualMachine', 'Cluster', 'Management')
             LicenseUri = 'https://github.com/freedbygrace/PSProxmox/blob/main/LICENSE'
             ProjectUri = 'https://github.com/freedbygrace/PSProxmox'
-            ReleaseNotes = 'Initial release of PSProxmox module. See https://github.com/freedbygrace/PSProxmox/releases/tag/v2025.04.28.1902'
+            ReleaseNotes = 'Added automatic connection handling and Test-ProxmoxConnection cmdlet. See https://github.com/freedbygrace/PSProxmox/releases/tag/v2025.05.10.1000'
         }
     }
 }

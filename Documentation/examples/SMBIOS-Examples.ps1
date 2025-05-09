@@ -6,13 +6,13 @@ Import-Module PSProxmox
 
 # Connect to the Proxmox VE server
 $credential = Get-Credential -Message "Enter your Proxmox VE credentials"
-$connection = Connect-ProxmoxServer -Server "proxmox.example.com" -Credential $credential -Realm "pam"
+Connect-ProxmoxServer -Server "proxmox.example.com" -Credential $credential -Realm "pam"
 
 # Example 1: Create a VM with automatic SMBIOS settings using a specific manufacturer profile
-$vm1 = New-ProxmoxVM -Connection $connection -Node "pve1" -Name "dell-server" -Memory 2048 -Cores 2 -DiskSize 32 -AutomaticSMBIOS -SMBIOSProfile "Dell"
+$vm1 = New-ProxmoxVM -Node "pve1" -Name "dell-server" -Memory 2048 -Cores 2 -DiskSize 32 -AutomaticSMBIOS -SMBIOSProfile "Dell"
 
 # Example 2: Create a VM with automatic SMBIOS settings using a random manufacturer profile
-$vm2 = New-ProxmoxVM -Connection $connection -Node "pve1" -Name "random-server" -Memory 2048 -Cores 2 -DiskSize 32 -AutomaticSMBIOS -SMBIOSProfile "Random"
+$vm2 = New-ProxmoxVM -Node "pve1" -Name "random-server" -Memory 2048 -Cores 2 -DiskSize 32 -AutomaticSMBIOS -SMBIOSProfile "Random"
 
 # Example 3: Create a VM using the builder pattern with automatic SMBIOS settings
 $builder = New-ProxmoxVMBuilder -Name "hp-server" -AutomaticSMBIOS -SMBIOSProfile "HP"
@@ -21,7 +21,7 @@ $builder.WithMemory(4096)
         .WithDisk(50, "local-lvm")
         .WithNetwork("virtio", "vmbr0")
         .WithStart($true)
-$vm3 = New-ProxmoxVM -Connection $connection -Node "pve1" -Builder $builder
+$vm3 = New-ProxmoxVM -Node "pve1" -Builder $builder
 
 # Example 4: Create a VM using the builder pattern with manual SMBIOS settings
 $builder = New-ProxmoxVMBuilder -Name "custom-server"
@@ -34,10 +34,10 @@ $builder.WithMemory(4096)
         .WithSMBIOSVersion("1.0")
         .WithSMBIOSSerial("CUSTOM123")
         .WithStart($true)
-$vm4 = New-ProxmoxVM -Connection $connection -Node "pve1" -Builder $builder
+$vm4 = New-ProxmoxVM -Node "pve1" -Builder $builder
 
 # Example 5: Get SMBIOS settings for an existing VM
-$smbios = Get-ProxmoxVMSMBIOS -Connection $connection -Node "pve1" -VMID 100
+$smbios = Get-ProxmoxVMSMBIOS -Node "pve1" -VMID 100
 Write-Host "Current SMBIOS settings for VM 100:"
 Write-Host "Manufacturer: $($smbios.Manufacturer)"
 Write-Host "Product: $($smbios.Product)"
@@ -47,10 +47,10 @@ Write-Host "Family: $($smbios.Family)"
 Write-Host "UUID: $($smbios.UUID)"
 
 # Example 6: Update SMBIOS settings for an existing VM using individual parameters
-Set-ProxmoxVMSMBIOS -Connection $connection -Node "pve1" -VMID 100 -Manufacturer "Lenovo" -Product "ThinkSystem SR650" -Serial "LENOVO123"
+Set-ProxmoxVMSMBIOS -Node "pve1" -VMID 100 -Manufacturer "Lenovo" -Product "ThinkSystem SR650" -Serial "LENOVO123"
 
 # Example 7: Update SMBIOS settings for an existing VM using a manufacturer profile
-Set-ProxmoxVMSMBIOS -Connection $connection -Node "pve1" -VMID 101 -UseProfile -Profile "VMware" -PassThru
+Set-ProxmoxVMSMBIOS -Node "pve1" -VMID 101 -UseProfile -Profile "VMware" -PassThru
 
 # Example 8: Create a VM with SMBIOS settings that mimic a physical server for licensing purposes
 $builder = New-ProxmoxVMBuilder -Name "license-server" -AutomaticSMBIOS -SMBIOSProfile "Dell"
@@ -59,7 +59,7 @@ $builder.WithMemory(8192)
         .WithDisk(100, "local-lvm")
         .WithNetwork("virtio", "vmbr0")
         .WithStart($true)
-$vm5 = New-ProxmoxVM -Connection $connection -Node "pve1" -Builder $builder
+$vm5 = New-ProxmoxVM -Node "pve1" -Builder $builder
 
 # Example 9: Create a VM with Microsoft Surface SMBIOS settings
 $builder = New-ProxmoxVMBuilder -Name "surface-pro" -AutomaticSMBIOS -SMBIOSProfile "Microsoft"
@@ -68,7 +68,8 @@ $builder.WithMemory(4096)
         .WithDisk(50, "local-lvm")
         .WithNetwork("virtio", "vmbr0")
         .WithStart($true)
-$vm6 = New-ProxmoxVM -Connection $connection -Node "pve1" -Builder $builder
+$vm6 = New-ProxmoxVM -Node "pve1" -Builder $builder
 
-# Disconnect from the server when done
+# Get the current connection and disconnect from the server when done
+$connection = Test-ProxmoxConnection -Detailed
 Disconnect-ProxmoxServer -Connection $connection
