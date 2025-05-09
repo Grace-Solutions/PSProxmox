@@ -1,7 +1,7 @@
 @{
     RootModule = 'PSProxmox.psm1'
     NestedModules = @('bin\PSProxmox.dll')
-    ModuleVersion = '2025.05.09.1511'
+    ModuleVersion = '2025.05.10.1400'
     GUID = 'd24f0894-3d0c-4ef1-a41e-b273c3db86ad'
     Author = 'PSProxmox Team'
     CompanyName = 'PSProxmox'
@@ -83,12 +83,13 @@
     PrivateData = @{
         PSData = @{
             Tags = @('Proxmox', 'VirtualMachine', 'Cluster', 'Management')
-            LicenseUri = 'https://github.com/freedbygrace/PSProxmox/blob/main/LICENSE'
-            ProjectUri = 'https://github.com/freedbygrace/PSProxmox'
-            ReleaseNotes = 'Added regex and wildcard filtering to Get-* cmdlets. See https://github.com/freedbygrace/PSProxmox/releases/tag/v2025.05.10.1200'
+            LicenseUri = 'https://github.com/Grace-Solutions/PSProxmox/blob/main/LICENSE'
+            ProjectUri = 'https://github.com/Grace-Solutions/PSProxmox'
+            ReleaseNotes = 'Moved repository to Grace-Solutions organization. Added regex and wildcard filtering to Get-* cmdlets. See https://github.com/Grace-Solutions/PSProxmox/releases/tag/v2025.05.10.1400'
         }
     }
 }
+
 
 
 

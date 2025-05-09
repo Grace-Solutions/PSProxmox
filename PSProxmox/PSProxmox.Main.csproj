@@ -9,8 +9,8 @@
     <Company>PSProxmox</Company>
     <Description>PowerShell module for managing Proxmox VE clusters</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/freedbygrace/PSProxmox</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/freedbygrace/PSProxmox</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/Grace-Solutions/PSProxmox</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Grace-Solutions/PSProxmox</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>PowerShell;Proxmox;VE;Virtualization</PackageTags>
   </PropertyGroup>
