@@ -7,6 +7,8 @@ PSProxmox is a C#-based PowerShell module for managing Proxmox VE clusters. It p
 - **Session Management**: Authenticate and persist sessions with Proxmox VE clusters
 - **Core CRUD Operations**: Manage VMs, Storage, Network, Users, Roles, SDN, and Clusters
 - **Templates**: Create and use VM deployment templates
+- **Cloud Images**: Download, customize, and create templates from cloud images
+- **Cloud-Init Support**: Configure VMs with Cloud-Init for easy customization
 - **Mass Creation**: Bulk create VMs with prefix/counter
 - **IP Management**: CIDR parsing, subnetting, FIFO IP queue assignment
 - **Structured Objects**: All outputs are typed C# classes (PowerShell-native)
@@ -106,6 +108,35 @@ $vm = New-ProxmoxVMFromTemplate -Node "pve1" -TemplateName "Ubuntu-Template" -Na
 
 # Create multiple VMs from a template
 $vms = New-ProxmoxVMFromTemplate -Node "pve1" -TemplateName "Ubuntu-Template" -Prefix "web" -Count 3 -Start
+```
+
+### Working with Cloud Images
+
+```powershell
+# List available cloud images
+Get-ProxmoxCloudImage -Distribution "ubuntu" -Release "22.04"
+
+# Download a cloud image
+$imagePath = Save-ProxmoxCloudImage -Distribution "ubuntu" -Release "22.04" -Variant "server"
+
+# Customize the cloud image (resize to 20GB)
+$customizedImagePath = Invoke-ProxmoxCloudImageCustomization -ImagePath $imagePath -Resize 20 -ConvertTo "qcow2"
+
+# Create a template from the cloud image
+$template = New-ProxmoxCloudImageTemplate -Node "pve1" -Name "ubuntu-22.04" -ImagePath $customizedImagePath -Storage "local-lvm" -Memory 2048 -Cores 2 -DiskSize 20
+
+# Alternatively, download and create a template in one step
+$template = New-ProxmoxCloudImageTemplate -Node "pve1" -Name "ubuntu-22.04" -Distribution "ubuntu" -Release "22.04" -Storage "local-lvm" -Memory 2048 -Cores 2 -DiskSize 20
+
+# Configure Cloud-Init for a VM
+$password = ConvertTo-SecureString "SecurePassword123!" -AsPlainText -Force
+$sshKey = Get-Content -Path "~/.ssh/id_rsa.pub"
+Set-ProxmoxVMCloudInit -Node "pve1" -VMID 100 -Username "admin" -Password $password -SSHKey $sshKey -IPConfig "dhcp" -DNS "8.8.8.8,8.8.4.4"
+
+# Create a VM from the template with static IP
+$vm = New-ProxmoxVMFromTemplate -Node "pve1" -TemplateName "ubuntu-22.04" -Name "web01"
+Set-ProxmoxVMCloudInit -Node "pve1" -VMID $vm.VMID -Username "admin" -Password $password -IPConfig "ip=192.168.1.100/24,gw=192.168.1.1"
+Start-ProxmoxVM -Node "pve1" -VMID $vm.VMID
 ```
 
 ### Managing Storage
@@ -257,6 +288,8 @@ For detailed documentation, see the [Documentation](Documentation) directory. Th
 - [Cmdlet Reference](Documentation/cmdlets/README.md)
 - [Examples](Documentation/examples/README.md)
 - [Guides](Documentation/guides/README.md)
+  - [Installation Guide](Documentation/guides/Installation.md)
+  - [Cloud Image Templates Guide](Documentation/guides/CloudImageTemplates.md)
 
 ## Contributing
 
