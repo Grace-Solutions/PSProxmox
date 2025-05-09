@@ -50,7 +50,7 @@ Install-Module -Name PSProxmox -Scope CurrentUser
 
 ```powershell
 # Clone the repository
-git clone https://github.com/freedbygrace/PSProxmox.git
+git clone https://github.com/Grace-Solutions/PSProxmox.git
 cd PSProxmox
 
 # Build the module

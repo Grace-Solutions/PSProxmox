@@ -29,7 +29,7 @@ Install-Module -Name PSProxmox -Scope AllUsers
 
 You can also install the PSProxmox module directly from a GitHub release:
 
-1. Download the latest release from the [GitHub repository](https://github.com/freedbygrace/PSProxmox/releases)
+1. Download the latest release from the [GitHub repository](https://github.com/Grace-Solutions/PSProxmox/releases)
 2. Extract the ZIP file
 3. Run the `Install-PSProxmox.ps1` script included in the package:
 
@@ -43,7 +43,7 @@ You can build and install the PSProxmox module from source:
 
 1. Clone the repository:
 ```powershell
-git clone https://github.com/freedbygrace/PSProxmox.git
+git clone https://github.com/Grace-Solutions/PSProxmox.git
 cd PSProxmox
 ```
 
@@ -61,7 +61,7 @@ cd PSProxmox
 
 You can manually install the PSProxmox module by copying the files to your PowerShell modules directory:
 
-1. Download the latest release from the [GitHub repository](https://github.com/freedbygrace/PSProxmox/releases)
+1. Download the latest release from the [GitHub repository](https://github.com/Grace-Solutions/PSProxmox/releases)
 2. Extract the ZIP file
 3. Copy the extracted files to a folder named "PSProxmox" in your PowerShell modules directory:
 
