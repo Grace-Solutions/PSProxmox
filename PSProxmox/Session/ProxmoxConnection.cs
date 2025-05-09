@@ -93,5 +93,14 @@ namespace PSProxmox.Session
             };
             return connection;
         }
+
+        /// <summary>
+        /// Returns a string representation of the connection.
+        /// </summary>
+        /// <returns>A string representation of the connection.</returns>
+        public override string ToString()
+        {
+            return $"Proxmox Connection: {Username}@{Realm} on {Server}:{Port} ({(IsAuthenticated ? "Authenticated" : "Not Authenticated")})";
+        }
     }
 }

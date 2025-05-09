@@ -28,13 +28,8 @@ namespace PSProxmox.Cmdlets
     /// </summary>
     [Cmdlet(VerbsCommon.Get, "ProxmoxVM")]
     [OutputType(typeof(ProxmoxVM), typeof(string))]
-    public class GetProxmoxVMCmdlet : PSCmdlet
+    public class GetProxmoxVMCmdlet : ProxmoxCmdlet
     {
-        /// <summary>
-        /// <para type="description">The connection to the Proxmox VE server.</para>
-        /// </summary>
-        [Parameter(Mandatory = true, Position = 0)]
-        public ProxmoxConnection Connection { get; set; }
 
         /// <summary>
         /// <para type="description">The ID of the virtual machine to retrieve.</para>
@@ -61,7 +56,9 @@ namespace PSProxmox.Cmdlets
         {
             try
             {
-                var client = new ProxmoxApiClient(Connection, this);
+                var connection = GetConnection();
+                ValidateConnection(connection);
+                var client = new ProxmoxApiClient(connection, this);
                 string response;
 
                 if (VMID.HasValue)
@@ -193,7 +190,7 @@ namespace PSProxmox.Cmdlets
             }
             catch (Exception ex)
             {
-                WriteError(new ErrorRecord(ex, "GetProxmoxVMError", ErrorCategory.OperationStopped, Connection));
+                WriteError(new ErrorRecord(ex, "GetProxmoxVMError", ErrorCategory.OperationStopped, null));
             }
         }
     }

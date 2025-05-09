@@ -34,6 +34,18 @@ namespace PSProxmox.Cmdlets
                 }
 
                 ProxmoxSession.Logout(Connection, this);
+
+                // Clear the global connection variable if it matches the disconnected connection
+                var globalConnection = SessionState.PSVariable.GetValue("DefaultProxmoxConnection") as ProxmoxConnection;
+                if (globalConnection != null &&
+                    globalConnection.Server == Connection.Server &&
+                    globalConnection.Port == Connection.Port &&
+                    globalConnection.Username == Connection.Username)
+                {
+                    SessionState.PSVariable.Remove("DefaultProxmoxConnection");
+                    WriteVerbose("Cleared default connection");
+                }
+
                 WriteVerbose($"Disconnected from {Connection.Server}");
             }
             catch (Exception ex)

@@ -238,7 +238,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## Notes
 
 - This cmdlet must be called before using any other cmdlets in the PSProxmox module.
-- The connection object is returned and should be stored in a variable for use with other cmdlets.
+- The connection object is returned and automatically stored as the default connection.
+- Other cmdlets will automatically use the default connection if no connection is specified.
+- You can still store the connection in a variable and pass it explicitly to cmdlets if needed.
 - If you use the `-SkipCertificateValidation` parameter, the SSL certificate validation will be skipped, which is not recommended for production environments.
 
 ## Examples

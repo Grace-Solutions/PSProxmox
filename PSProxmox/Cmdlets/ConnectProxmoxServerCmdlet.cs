@@ -108,9 +108,11 @@ namespace PSProxmox.Cmdlets
                     Realm,
                     this);
 
-                // Return the actual connection object instead of the connection info
+                // Store the connection in a global variable for automatic use by other cmdlets
+                SessionState.PSVariable.Set(new PSVariable("DefaultProxmoxConnection", connection, ScopedItemOptions.AllScope));
+
+                // Return the connection object
                 WriteObject(connection);
-                SessionState.PSVariable.Set(new PSVariable("ProxmoxConnection", connection, ScopedItemOptions.Private));
             }
             catch (Exception ex)
             {
