@@ -5,10 +5,12 @@ PSProxmox is a C#-based PowerShell module for managing Proxmox VE clusters. It p
 ## Features
 
 - **Session Management**: Authenticate and persist sessions with Proxmox VE clusters
-- **Core CRUD Operations**: Manage VMs, Storage, Network, Users, Roles, SDN, and Clusters
+- **Core CRUD Operations**: Manage VMs, LXC Containers, Storage, Network, Users, Roles, SDN, and Clusters
 - **Templates**: Create and use VM deployment templates
 - **Cloud Images**: Download, customize, and create templates from cloud images
 - **Cloud-Init Support**: Configure VMs with Cloud-Init for easy customization
+- **LXC Containers**: Create and manage Linux Containers with full CRUD operations
+- **TurnKey Templates**: Download and use TurnKey Linux templates for LXC containers
 - **Mass Creation**: Bulk create VMs with prefix/counter
 - **IP Management**: CIDR parsing, subnetting, FIFO IP queue assignment
 - **Structured Objects**: All outputs are typed C# classes (PowerShell-native)
@@ -249,6 +251,59 @@ $pool = Get-ProxmoxIPPool -Name "Production"
 Clear-ProxmoxIPPool -Name "Production"
 ```
 
+### Managing LXC Containers
+
+```powershell
+# Get all LXC containers
+$containers = Get-ProxmoxContainer
+
+# Get a specific container
+$container = Get-ProxmoxContainer -CTID 100
+
+# Get containers by name pattern (supports wildcards and regex)
+$webContainers = Get-ProxmoxContainer -Name "web*"
+$dbContainers = Get-ProxmoxContainer -Name "^db\d+$"
+
+# Create a new container
+$container = New-ProxmoxContainer -Node "pve1" -Name "web-container" -OSTemplate "local:vztmpl/ubuntu-20.04-standard_20.04-1_amd64.tar.gz" -Storage "local-lvm" -Memory 512 -Cores 1 -DiskSize 8 -Unprivileged -Start
+
+# Create a container using a builder
+$builder = New-ProxmoxContainerBuilder -Name "db-container"
+$builder.WithOSTemplate("local:vztmpl/ubuntu-20.04-standard_20.04-1_amd64.tar.gz")
+        .WithStorage("local-lvm")
+        .WithMemory(1024)
+        .WithCores(2)
+        .WithDiskSize(16)
+        .WithUnprivileged($true)
+        .WithStart($true)
+
+$container = New-ProxmoxContainer -Node "pve1" -Builder $builder
+
+# Start, stop, and restart containers
+Start-ProxmoxContainer -Node "pve1" -CTID 100 -Wait
+Stop-ProxmoxContainer -Node "pve1" -CTID 100 -Wait
+Restart-ProxmoxContainer -Node "pve1" -CTID 100 -Wait
+
+# Remove a container
+Remove-ProxmoxContainer -Node "pve1" -CTID 100 -Confirm:$false
+```
+
+### Working with TurnKey Linux Templates
+
+```powershell
+# List available TurnKey templates
+$templates = Get-ProxmoxTurnKeyTemplate
+
+# Get TurnKey templates by name pattern
+$wordpressTemplates = Get-ProxmoxTurnKeyTemplate -Name "wordpress*"
+
+# Download a TurnKey template
+$templatePath = Save-ProxmoxTurnKeyTemplate -Node "pve1" -Name "wordpress" -Storage "local"
+
+# Create a container from a TurnKey template
+$container = New-ProxmoxContainerFromTurnKey -Node "pve1" -Name "wordpress" -Template "wordpress" -Storage "local-lvm" -Memory 512 -Cores 1 -DiskSize 8 -Start
+```
+
 ## Disconnecting
 
 ```powershell
@@ -290,6 +345,7 @@ For detailed documentation, see the [Documentation](Documentation) directory. Th
 - [Guides](Documentation/guides/README.md)
   - [Installation Guide](Documentation/guides/Installation.md)
   - [Cloud Image Templates Guide](Documentation/guides/CloudImageTemplates.md)
+  - [LXC Containers Guide](Documentation/guides/LXCContainers.md)
 
 ## Contributing
 

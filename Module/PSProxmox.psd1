@@ -1,5 +1,5 @@
 @{
-    ModuleVersion = '2025.05.10.1500'
+    ModuleVersion = '2025.05.10.1600'
     GUID = 'd24f0894-3d0c-4ef1-a41e-b273c3db86ad'
     Author = 'PSProxmox Team'
     CompanyName = 'PSProxmox'
@@ -83,7 +83,21 @@
         'Save-ProxmoxCloudImage',
         'Invoke-ProxmoxCloudImageCustomization',
         'New-ProxmoxCloudImageTemplate',
-        'Set-ProxmoxVMCloudInit'
+        'Set-ProxmoxVMCloudInit',
+
+        # LXC Container Management
+        'Get-ProxmoxContainer',
+        'New-ProxmoxContainer',
+        'New-ProxmoxContainerBuilder',
+        'Remove-ProxmoxContainer',
+        'Start-ProxmoxContainer',
+        'Stop-ProxmoxContainer',
+        'Restart-ProxmoxContainer',
+
+        # TurnKey Template Management
+        'Get-ProxmoxTurnKeyTemplate',
+        'Save-ProxmoxTurnKeyTemplate',
+        'New-ProxmoxContainerFromTurnKey'
     )
     VariablesToExport = @()
     AliasesToExport = @()
@@ -92,7 +106,7 @@
             Tags = @('Proxmox', 'VirtualMachine', 'Cluster', 'Management')
             LicenseUri = 'https://github.com/Grace-Solutions/PSProxmox/blob/main/LICENSE'
             ProjectUri = 'https://github.com/Grace-Solutions/PSProxmox'
-            ReleaseNotes = 'Added cloud image template functionality. See https://github.com/Grace-Solutions/PSProxmox/releases/tag/v2025.05.10.1500'
+            ReleaseNotes = 'Added LXC container and TurnKey template support. See https://github.com/Grace-Solutions/PSProxmox/releases/tag/v2025.05.10.1600'
         }
     }
 }
