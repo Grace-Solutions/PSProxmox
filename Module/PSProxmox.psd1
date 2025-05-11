@@ -1,5 +1,5 @@
 @{
-    ModuleVersion = '2025.05.10.1600'
+    ModuleVersion = '2025.05.11.0935'
     GUID = 'd24f0894-3d0c-4ef1-a41e-b273c3db86ad'
     Author = 'PSProxmox Team'
     CompanyName = 'PSProxmox'
@@ -106,7 +106,7 @@
             Tags = @('Proxmox', 'VirtualMachine', 'Cluster', 'Management')
             LicenseUri = 'https://github.com/Grace-Solutions/PSProxmox/blob/main/LICENSE'
             ProjectUri = 'https://github.com/Grace-Solutions/PSProxmox'
-            ReleaseNotes = 'Added LXC container and TurnKey template support. See https://github.com/Grace-Solutions/PSProxmox/releases/tag/v2025.05.10.1600'
+            ReleaseNotes = 'Added LXC container and TurnKey template support. See https://github.com/Grace-Solutions/PSProxmox/releases/tag/v2025.05.11.0935'
         }
     }
 }
