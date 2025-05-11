@@ -68,14 +68,14 @@ namespace PSProxmox.CloudImages
                 (string.IsNullOrEmpty(variant) || i.Variant == variant));
         }
 
-        private static async Task<Dictionary<string, Dictionary<string, CloudImageMetadata>>> GetMetadataAsync()
+        private static Task<Dictionary<string, Dictionary<string, CloudImageMetadata>>> GetMetadataAsync()
         {
             if (File.Exists(_metadataFile))
             {
                 try
                 {
                     var json = File.ReadAllText(_metadataFile);
-                    return JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, CloudImageMetadata>>>(json);
+                    return Task.FromResult(JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, CloudImageMetadata>>>(json));
                 }
                 catch
                 {
@@ -83,13 +83,14 @@ namespace PSProxmox.CloudImages
                 }
             }
 
-            return new Dictionary<string, Dictionary<string, CloudImageMetadata>>(StringComparer.OrdinalIgnoreCase);
+            return Task.FromResult(new Dictionary<string, Dictionary<string, CloudImageMetadata>>(StringComparer.OrdinalIgnoreCase));
         }
 
-        private static async Task SaveMetadataAsync(Dictionary<string, Dictionary<string, CloudImageMetadata>> metadata)
+        private static Task SaveMetadataAsync(Dictionary<string, Dictionary<string, CloudImageMetadata>> metadata)
         {
             var json = JsonConvert.SerializeObject(metadata, Formatting.Indented);
             File.WriteAllText(_metadataFile, json);
+            return Task.CompletedTask;
         }
 
         private static async Task<Dictionary<string, CloudImageMetadata>> FetchDistributionMetadataAsync(string distribution)

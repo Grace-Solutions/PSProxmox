@@ -20,6 +20,14 @@ namespace PSProxmox.Cmdlets
     ///   <para>Download a Debian 11 generic cloud image</para>
     ///   <code>Save-ProxmoxCloudImage -Distribution "debian" -Release "11" -Variant "generic"</code>
     /// </example>
+    /// <example>
+    ///   <para>Get Ubuntu 22.04 server cloud image and download it</para>
+    ///   <code>Get-ProxmoxCloudImage -Distribution "ubuntu" -Release "22.04" -Variant "server" | Save-ProxmoxCloudImage</code>
+    /// </example>
+    /// <example>
+    ///   <para>Download an Ubuntu 22.04 server cloud image to a specific location</para>
+    ///   <code>Save-ProxmoxCloudImage -Distribution "ubuntu" -Release "22.04" -Variant "server" -OutputPath "C:\Images\ubuntu-22.04-server.img"</code>
+    /// </example>
     [Cmdlet(VerbsData.Save, "ProxmoxCloudImage")]
     [OutputType(typeof(string))]
     public class SaveProxmoxCloudImageCmdlet : PSCmdlet
@@ -27,32 +35,40 @@ namespace PSProxmox.Cmdlets
         /// <summary>
         /// <para type="description">The distribution to download (e.g., "ubuntu", "debian").</para>
         /// </summary>
-        [Parameter(Mandatory = true, Position = 0)]
+        [Parameter(Mandatory = true, Position = 0, ValueFromPipelineByPropertyName = true, ParameterSetName = "ByProperties")]
         [ValidateSet("ubuntu", "debian")]
         public string Distribution { get; set; }
 
         /// <summary>
         /// <para type="description">The release version to download (e.g., "22.04", "11").</para>
         /// </summary>
-        [Parameter(Mandatory = true, Position = 1)]
+        [Parameter(Mandatory = true, Position = 1, ValueFromPipelineByPropertyName = true, ParameterSetName = "ByProperties")]
         public string Release { get; set; }
 
         /// <summary>
         /// <para type="description">The image variant to download (e.g., "server", "minimal").</para>
         /// </summary>
-        [Parameter(Mandatory = false, Position = 2)]
+        [Parameter(Mandatory = false, Position = 2, ValueFromPipelineByPropertyName = true, ParameterSetName = "ByProperties")]
         public string Variant { get; set; }
+
+        /// <summary>
+        /// <para type="description">The cloud image object to download.</para>
+        /// </summary>
+        [Parameter(Mandatory = true, ValueFromPipeline = true, ParameterSetName = "ByCloudImage")]
+        public CloudImage CloudImage { get; set; }
 
         /// <summary>
         /// <para type="description">The output path where the image will be saved. If not specified, the image will be saved to the default download directory.</para>
         /// </summary>
-        [Parameter(Mandatory = false)]
+        [Parameter(Mandatory = false, ParameterSetName = "ByProperties")]
+        [Parameter(Mandatory = false, ParameterSetName = "ByCloudImage")]
         public string OutputPath { get; set; }
 
         /// <summary>
         /// <para type="description">Force download even if the image already exists.</para>
         /// </summary>
-        [Parameter(Mandatory = false)]
+        [Parameter(Mandatory = false, ParameterSetName = "ByProperties")]
+        [Parameter(Mandatory = false, ParameterSetName = "ByCloudImage")]
         public SwitchParameter Force { get; set; }
 
         /// <summary>
@@ -65,10 +81,21 @@ namespace PSProxmox.Cmdlets
                 var task = Task.Run(async () =>
                 {
                     // Get the cloud image
-                    var image = await CloudImageRepository.GetImageAsync(Distribution, Release, Variant);
-                    if (image == null)
+                    CloudImage image;
+
+                    if (ParameterSetName == "ByCloudImage")
                     {
-                        throw new Exception($"Cloud image not found for {Distribution} {Release} {Variant}");
+                        // Use the provided CloudImage object
+                        image = CloudImage;
+                    }
+                    else
+                    {
+                        // Get the cloud image from the repository
+                        image = await CloudImageRepository.GetImageAsync(Distribution, Release, Variant);
+                        if (image == null)
+                        {
+                            throw new Exception($"Cloud image not found for {Distribution} {Release} {Variant}");
+                        }
                     }
 
                     // Create a cancellation token source

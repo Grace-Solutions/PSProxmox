@@ -25,6 +25,10 @@ namespace PSProxmox.Cmdlets
     ///   <para>Get Ubuntu 22.04 cloud images</para>
     ///   <code>Get-ProxmoxCloudImage -Distribution "ubuntu" -Release "22.04"</code>
     /// </example>
+    /// <example>
+    ///   <para>Get Ubuntu 22.04 server cloud image and download it</para>
+    ///   <code>Get-ProxmoxCloudImage -Distribution "ubuntu" -Release "22.04" -Variant "server" | Save-ProxmoxCloudImage</code>
+    /// </example>
     [Cmdlet(VerbsCommon.Get, "ProxmoxCloudImage")]
     [OutputType(typeof(CloudImage))]
     public class GetProxmoxCloudImageCmdlet : PSCmdlet
