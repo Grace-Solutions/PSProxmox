@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>PSProxmox</AssemblyName>
     <RootNamespace>PSProxmox</RootNamespace>
-    <Version>2023.04.28.1324</Version>
+    <Version>2025.05.30.1740</Version>
     <Authors>PSProxmox Contributors</Authors>
     <Company>PSProxmox</Company>
     <Description>PowerShell module for managing Proxmox VE clusters</Description>
@@ -97,6 +97,7 @@
     <Compile Include="Models\ProxmoxUser.cs" />
     <Compile Include="Models\ProxmoxVM.cs" />
     <Compile Include="Models\ProxmoxVMBuilder.cs" />
+    <Compile Include="Models\ProxmoxVMGuestAgent.cs" />
     <Compile Include="Models\ProxmoxVMSMBIOS.cs" />
     <Compile Include="Models\ProxmoxVMSMBIOSProfile.cs" />
     <Compile Include="Models\ProxmoxVMTemplate.cs" />

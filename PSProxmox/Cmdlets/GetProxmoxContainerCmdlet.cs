@@ -4,8 +4,10 @@ using System.Linq;
 using System.Management.Automation;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
+using PSProxmox.Client;
 using PSProxmox.Models;
 using PSProxmox.Session;
+using PSProxmox.Utilities;
 
 namespace PSProxmox.Cmdlets
 {
@@ -95,13 +97,13 @@ namespace PSProxmox.Cmdlets
                 {
                     // Get all containers on a specific node
                     var containers = GetContainers(Node);
-                    
+
                     // Filter by name if specified
                     if (!string.IsNullOrEmpty(Name))
                     {
                         containers = FilterContainersByName(containers, Name);
                     }
-                    
+
                     WriteObject(containers, true);
                 }
                 else
@@ -109,19 +111,19 @@ namespace PSProxmox.Cmdlets
                     // Get all containers on all nodes
                     var nodes = GetNodes();
                     var allContainers = new List<ProxmoxContainer>();
-                    
+
                     foreach (var node in nodes)
                     {
                         var containers = GetContainers(node.Name);
                         allContainers.AddRange(containers);
                     }
-                    
+
                     // Filter by name if specified
                     if (!string.IsNullOrEmpty(Name))
                     {
                         allContainers = FilterContainersByName(allContainers, Name);
                     }
-                    
+
                     WriteObject(allContainers, true);
                 }
             }
@@ -133,24 +135,26 @@ namespace PSProxmox.Cmdlets
 
         private List<ProxmoxNode> GetNodes()
         {
-            var response = Connection.GetJson("/nodes");
-            var data = response["data"];
-            
+            var client = GetProxmoxClient();
+            var response = client.Get("nodes");
+            var data = JsonUtility.DeserializeResponse<JArray>(response);
+
             var nodes = new List<ProxmoxNode>();
             foreach (var item in data)
             {
                 var node = item.ToObject<ProxmoxNode>();
                 nodes.Add(node);
             }
-            
+
             return nodes;
         }
 
         private List<ProxmoxContainer> GetContainers(string node)
         {
-            var response = Connection.GetJson($"/nodes/{node}/lxc");
-            var data = response["data"];
-            
+            var client = GetProxmoxClient();
+            var response = client.Get($"nodes/{node}/lxc");
+            var data = JsonUtility.DeserializeResponse<JArray>(response);
+
             var containers = new List<ProxmoxContainer>();
             foreach (var item in data)
             {
@@ -158,7 +162,7 @@ namespace PSProxmox.Cmdlets
                 container.Node = node;
                 containers.Add(container);
             }
-            
+
             return containers;
         }
 
@@ -166,20 +170,20 @@ namespace PSProxmox.Cmdlets
         {
             try
             {
-                var response = Connection.GetJson($"/nodes/{node}/lxc/{ctid}/status/current");
-                var data = response["data"];
-                
-                var container = data.ToObject<ProxmoxContainer>();
-                container.Node = node;
-                container.CTID = ctid;
-                
+                var client = GetProxmoxClient();
+                var response = client.Get($"nodes/{node}/lxc/{ctid}/status/current");
+                var data = JsonUtility.DeserializeResponse<ProxmoxContainer>(response);
+
+                data.Node = node;
+                data.CTID = ctid;
+
                 // Get additional configuration
-                var configResponse = Connection.GetJson($"/nodes/{node}/lxc/{ctid}/config");
-                var configData = configResponse["data"];
-                
-                container.Config = configData.ToObject<Dictionary<string, object>>();
-                
-                return container;
+                var configResponse = client.Get($"nodes/{node}/lxc/{ctid}/config");
+                var configData = JsonUtility.DeserializeResponse<Dictionary<string, object>>(configResponse);
+
+                data.Config = configData;
+
+                return data;
             }
             catch (Exception)
             {
@@ -196,7 +200,7 @@ namespace PSProxmox.Cmdlets
                 var regex = new Regex(namePattern);
                 return containers.Where(c => regex.IsMatch(c.Name)).ToList();
             }
-            
+
             // Otherwise, treat it as a wildcard pattern
             return containers.Where(c => IsWildcardMatch(c.Name, namePattern)).ToList();
         }
@@ -204,9 +208,9 @@ namespace PSProxmox.Cmdlets
         private bool IsRegexPattern(string pattern)
         {
             // Simple heuristic: if the pattern contains regex-specific characters, treat it as regex
-            return pattern.StartsWith("^") || pattern.EndsWith("$") || 
-                   pattern.Contains("(") || pattern.Contains(")") || 
-                   pattern.Contains("[") || pattern.Contains("]") || 
+            return pattern.StartsWith("^") || pattern.EndsWith("$") ||
+                   pattern.Contains("(") || pattern.Contains(")") ||
+                   pattern.Contains("[") || pattern.Contains("]") ||
                    pattern.Contains("\\");
         }
 
@@ -216,7 +220,7 @@ namespace PSProxmox.Cmdlets
             string regexPattern = "^" + Regex.Escape(pattern)
                 .Replace("\\*", ".*")
                 .Replace("\\?", ".") + "$";
-            
+
             return Regex.IsMatch(input, regexPattern, RegexOptions.IgnoreCase);
         }
     }

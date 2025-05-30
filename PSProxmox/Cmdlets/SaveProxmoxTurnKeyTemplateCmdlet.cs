@@ -2,8 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
+using Newtonsoft.Json.Linq;
+using PSProxmox.Client;
 using PSProxmox.Models;
 using PSProxmox.Session;
+using PSProxmox.Utilities;
 
 namespace PSProxmox.Cmdlets
 {
@@ -55,7 +58,7 @@ namespace PSProxmox.Cmdlets
                 // Get the template information
                 var templates = GetTemplates(Node);
                 var template = templates.FirstOrDefault(t => t.Name.Equals(Name, StringComparison.OrdinalIgnoreCase));
-                
+
                 if (template == null)
                 {
                     throw new Exception($"Template '{Name}' not found");
@@ -66,7 +69,7 @@ namespace PSProxmox.Cmdlets
                 {
                     var existingTemplates = GetDownloadedTemplates(Node, Storage);
                     var existingTemplate = existingTemplates.FirstOrDefault(t => t.Contains(template.Name));
-                    
+
                     if (existingTemplate != null)
                     {
                         WriteVerbose($"Template '{Name}' already exists at '{existingTemplate}'");
@@ -76,15 +79,16 @@ namespace PSProxmox.Cmdlets
                 }
 
                 // Download the template
-                var parameters = new Dictionary<string, object>
+                var client = GetProxmoxClient();
+                var parameters = new Dictionary<string, string>
                 {
                     { "template", template.URL },
                     { "storage", Storage }
                 };
 
-                var response = Connection.PostJson($"/nodes/{Node}/aplinfo", parameters);
-                var data = response["data"];
-                var taskId = (string)data["upid"];
+                var response = client.Post($"nodes/{Node}/aplinfo", parameters);
+                var responseData = JsonUtility.DeserializeResponse<JObject>(response);
+                var taskId = responseData["upid"]?.ToString();
 
                 var taskStatus = WaitForTask(Node, taskId);
                 if (taskStatus != "OK")
@@ -95,7 +99,7 @@ namespace PSProxmox.Cmdlets
                 // Get the downloaded template path
                 var downloadedTemplates = GetDownloadedTemplates(Node, Storage);
                 var downloadedTemplate = downloadedTemplates.FirstOrDefault(t => t.Contains(template.Name));
-                
+
                 if (downloadedTemplate == null)
                 {
                     throw new Exception($"Failed to find downloaded template '{Name}'");
@@ -113,17 +117,18 @@ namespace PSProxmox.Cmdlets
         private List<ProxmoxTurnKeyTemplate> GetTemplates(string node)
         {
             var templates = new List<ProxmoxTurnKeyTemplate>();
-            
+
             try
             {
                 // Get available templates from the appliance info
-                var response = Connection.GetJson($"/nodes/{node}/aplinfo");
-                var data = response["data"];
-                
+                var client = GetProxmoxClient();
+                var response = client.Get($"nodes/{node}/aplinfo");
+                var data = JsonUtility.DeserializeResponse<JArray>(response);
+
                 foreach (var item in data)
                 {
                     // Only include TurnKey templates
-                    if (item["package"] != null && item["package"].ToString().Contains("turnkey"))
+                    if (item["package"]?.ToString()?.Contains("turnkey") == true)
                     {
                         var template = item.ToObject<ProxmoxTurnKeyTemplate>();
                         templates.Add(template);
@@ -134,25 +139,26 @@ namespace PSProxmox.Cmdlets
             {
                 throw new Exception($"Failed to get templates: {ex.Message}");
             }
-            
+
             return templates;
         }
 
         private List<string> GetDownloadedTemplates(string node, string storage)
         {
             var templates = new List<string>();
-            
+
             try
             {
-                var response = Connection.GetJson($"/nodes/{node}/storage/{storage}/content");
-                var data = response["data"];
-                
+                var client = GetProxmoxClient();
+                var response = client.Get($"nodes/{node}/storage/{storage}/content");
+                var data = JsonUtility.DeserializeResponse<JArray>(response);
+
                 foreach (var item in data)
                 {
-                    if (item["content"] != null && item["content"].ToString() == "vztmpl" && 
-                        item["volid"] != null && item["volid"].ToString().Contains("turnkey"))
+                    if (item["content"]?.ToString() == "vztmpl" &&
+                        item["volid"]?.ToString()?.Contains("turnkey") == true)
                     {
-                        templates.Add(item["volid"].ToString());
+                        templates.Add(item["volid"]?.ToString());
                     }
                 }
             }
@@ -160,38 +166,39 @@ namespace PSProxmox.Cmdlets
             {
                 throw new Exception($"Failed to get downloaded templates: {ex.Message}");
             }
-            
+
             return templates;
         }
 
         private string WaitForTask(string node, string taskId)
         {
+            var client = GetProxmoxClient();
             var status = "";
             var attempts = 0;
             var maxAttempts = 300; // Wait up to 5 minutes
 
             while (attempts < maxAttempts)
             {
-                var response = Connection.GetJson($"/nodes/{node}/tasks/{taskId}/status");
-                var data = response["data"];
-                status = (string)data["status"];
+                var response = client.Get($"nodes/{node}/tasks/{taskId}/status");
+                var data = JsonUtility.DeserializeResponse<JObject>(response);
+                status = data["status"]?.ToString();
 
                 if (status == "stopped")
                 {
-                    return (string)data["exitstatus"];
+                    return data["exitstatus"]?.ToString() ?? "OK";
                 }
 
                 // Show progress
                 if (data["pid"] != null)
                 {
-                    var progressResponse = Connection.GetJson($"/nodes/{node}/tasks/{taskId}/log?start=0");
-                    var progressData = progressResponse["data"];
-                    
+                    var progressResponse = client.Get($"nodes/{node}/tasks/{taskId}/log?start=0");
+                    var progressData = JsonUtility.DeserializeResponse<JArray>(progressResponse);
+
                     foreach (var item in progressData)
                     {
-                        if (item["t"] != null && item["t"].ToString() == "TASK_STATUS")
+                        if (item["t"]?.ToString() == "TASK_STATUS")
                         {
-                            WriteProgress(new ProgressRecord(1, "Downloading template", item["t"].ToString()));
+                            WriteProgress(new ProgressRecord(1, "Downloading template", item["t"]?.ToString()));
                         }
                     }
                 }

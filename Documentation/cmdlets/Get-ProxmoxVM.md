@@ -1,6 +1,6 @@
 # Get-ProxmoxVM
 
-Gets virtual machines from Proxmox VE.
+Gets virtual machines from Proxmox VE with comprehensive information including guest agent data.
 
 ## Syntax
 
@@ -17,7 +17,7 @@ Get-ProxmoxVM
 
 ## Description
 
-The `Get-ProxmoxVM` cmdlet retrieves virtual machines from Proxmox VE. You can retrieve all VMs, VMs on a specific node, or a specific VM by ID.
+The `Get-ProxmoxVM` cmdlet retrieves virtual machines from Proxmox VE with comprehensive information including guest agent data when available. You can retrieve all VMs, VMs on a specific node, or a specific VM by ID. The cmdlet automatically attempts to gather guest agent information for each VM, providing detailed network interface information from within the guest operating system.
 
 ## Parameters
 
@@ -195,6 +195,45 @@ $json = Get-ProxmoxVM -RawJson
 ```
 
 This example gets the raw JSON response for all VMs.
+
+### Example 7: Get VM with guest agent information
+
+```powershell
+Connect-ProxmoxServer -Server "proxmox.example.com" -Credential (Get-Credential)
+$vm = Get-ProxmoxVM -VMID 100
+
+# Check if guest agent is available and running
+if ($vm.GuestAgent -and $vm.GuestAgent.Status -eq "running") {
+    Write-Host "Guest Agent is running"
+
+    # Display network interfaces from guest agent
+    foreach ($interface in $vm.GuestAgent.NetIf) {
+        Write-Host "Interface: $($interface.Name)"
+        Write-Host "  IPv4 Addresses: $($interface.IPv4Addresses -join ', ')"
+        Write-Host "  IPv6 Addresses: $($interface.IPv6Addresses -join ', ')"
+        Write-Host "  MAC Address: $($interface.MacAddress)"
+    }
+} else {
+    Write-Host "Guest Agent not available or not running"
+}
+```
+
+This example gets a VM and displays guest agent network information if available.
+
+### Example 8: Filter VMs with active guest agents
+
+```powershell
+Connect-ProxmoxServer -Server "proxmox.example.com" -Credential (Get-Credential)
+$vmsWithGuestAgent = Get-ProxmoxVM | Where-Object {
+    $_.GuestAgent -and $_.GuestAgent.Status -eq "running"
+}
+
+foreach ($vm in $vmsWithGuestAgent) {
+    Write-Host "$($vm.Name): $($vm.GuestAgent.NetIf.Count) network interfaces"
+}
+```
+
+This example gets all VMs and filters those with active guest agents.
 
 ## Related Links
 

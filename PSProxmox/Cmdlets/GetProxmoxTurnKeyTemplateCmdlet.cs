@@ -4,8 +4,10 @@ using System.Linq;
 using System.Management.Automation;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
+using PSProxmox.Client;
 using PSProxmox.Models;
 using PSProxmox.Session;
+using PSProxmox.Utilities;
 
 namespace PSProxmox.Cmdlets
 {
@@ -68,35 +70,35 @@ namespace PSProxmox.Cmdlets
                     // Get all nodes
                     var nodes = GetNodes();
                     var allTemplates = new List<ProxmoxTurnKeyTemplate>();
-                    
+
                     foreach (var node in nodes)
                     {
                         var templates = GetTemplates(node.Name);
                         allTemplates.AddRange(templates);
                     }
-                    
+
                     // Remove duplicates
                     allTemplates = allTemplates.GroupBy(t => t.Name).Select(g => g.First()).ToList();
-                    
+
                     // Filter by name if specified
                     if (!string.IsNullOrEmpty(Name))
                     {
                         allTemplates = FilterTemplatesByName(allTemplates, Name);
                     }
-                    
+
                     WriteObject(allTemplates, true);
                 }
                 else
                 {
                     // Get templates for the specified node
                     var templates = GetTemplates(Node);
-                    
+
                     // Filter by name if specified
                     if (!string.IsNullOrEmpty(Name))
                     {
                         templates = FilterTemplatesByName(templates, Name);
                     }
-                    
+
                     WriteObject(templates, true);
                 }
             }
@@ -108,39 +110,42 @@ namespace PSProxmox.Cmdlets
 
         private List<ProxmoxNode> GetNodes()
         {
-            var response = Connection.GetJson("/nodes");
-            var data = response["data"];
-            
+            var client = GetProxmoxClient();
+            var response = client.Get("nodes");
+            var data = JsonUtility.DeserializeResponse<JArray>(response);
+
             var nodes = new List<ProxmoxNode>();
             foreach (var item in data)
             {
                 var node = item.ToObject<ProxmoxNode>();
                 nodes.Add(node);
             }
-            
+
             return nodes;
         }
 
         private List<ProxmoxTurnKeyTemplate> GetTemplates(string node)
         {
             var templates = new List<ProxmoxTurnKeyTemplate>();
-            
+
             try
             {
+                var client = GetProxmoxClient();
+
                 // Get available templates from the appliance info
-                var response = Connection.GetJson($"/nodes/{node}/aplinfo");
-                var data = response["data"];
-                
+                var response = client.Get($"nodes/{node}/aplinfo");
+                var data = JsonUtility.DeserializeResponse<JArray>(response);
+
                 foreach (var item in data)
                 {
                     // Only include TurnKey templates
-                    if (item["package"] != null && item["package"].ToString().Contains("turnkey"))
+                    if (item["package"]?.ToString()?.Contains("turnkey") == true)
                     {
                         var template = item.ToObject<ProxmoxTurnKeyTemplate>();
                         templates.Add(template);
                     }
                 }
-                
+
                 // Get downloaded templates if requested
                 if (IncludeDownloaded.IsPresent)
                 {
@@ -149,17 +154,17 @@ namespace PSProxmox.Cmdlets
                     {
                         try
                         {
-                            var contentResponse = Connection.GetJson($"/nodes/{node}/storage/{storage.Storage}/content");
-                            var contentData = contentResponse["data"];
-                            
+                            var contentResponse = client.Get($"nodes/{node}/storage/{storage.Name}/content");
+                            var contentData = JsonUtility.DeserializeResponse<JArray>(contentResponse);
+
                             foreach (var item in contentData)
                             {
-                                if (item["content"] != null && item["content"].ToString() == "vztmpl" && 
-                                    item["volid"] != null && item["volid"].ToString().Contains("turnkey"))
+                                if (item["content"]?.ToString() == "vztmpl" &&
+                                    item["volid"]?.ToString()?.Contains("turnkey") == true)
                                 {
-                                    var volid = item["volid"].ToString();
+                                    var volid = item["volid"]?.ToString();
                                     var name = System.IO.Path.GetFileNameWithoutExtension(volid.Split('/').Last());
-                                    
+
                                     // Check if this template is already in the list
                                     if (!templates.Any(t => t.Name == name))
                                     {
@@ -168,10 +173,10 @@ namespace PSProxmox.Cmdlets
                                             Name = name,
                                             Title = name,
                                             Description = "Downloaded template",
-                                            Source = storage.Storage,
+                                            Source = storage.Name,
                                             Location = volid
                                         };
-                                        
+
                                         templates.Add(template);
                                     }
                                 }
@@ -188,22 +193,23 @@ namespace PSProxmox.Cmdlets
             {
                 // Skip this node if there's an error
             }
-            
+
             return templates;
         }
 
         private List<ProxmoxStorage> GetStorages(string node)
         {
-            var response = Connection.GetJson($"/nodes/{node}/storage");
-            var data = response["data"];
-            
+            var client = GetProxmoxClient();
+            var response = client.Get($"nodes/{node}/storage");
+            var data = JsonUtility.DeserializeResponse<JArray>(response);
+
             var storages = new List<ProxmoxStorage>();
             foreach (var item in data)
             {
                 var storage = item.ToObject<ProxmoxStorage>();
                 storages.Add(storage);
             }
-            
+
             return storages;
         }
 
@@ -215,7 +221,7 @@ namespace PSProxmox.Cmdlets
                 var regex = new Regex(namePattern);
                 return templates.Where(t => regex.IsMatch(t.Name)).ToList();
             }
-            
+
             // Otherwise, treat it as a wildcard pattern
             return templates.Where(t => IsWildcardMatch(t.Name, namePattern)).ToList();
         }
@@ -223,9 +229,9 @@ namespace PSProxmox.Cmdlets
         private bool IsRegexPattern(string pattern)
         {
             // Simple heuristic: if the pattern contains regex-specific characters, treat it as regex
-            return pattern.StartsWith("^") || pattern.EndsWith("$") || 
-                   pattern.Contains("(") || pattern.Contains(")") || 
-                   pattern.Contains("[") || pattern.Contains("]") || 
+            return pattern.StartsWith("^") || pattern.EndsWith("$") ||
+                   pattern.Contains("(") || pattern.Contains(")") ||
+                   pattern.Contains("[") || pattern.Contains("]") ||
                    pattern.Contains("\\");
         }
 
@@ -235,7 +241,7 @@ namespace PSProxmox.Cmdlets
             string regexPattern = "^" + Regex.Escape(pattern)
                 .Replace("\\*", ".*")
                 .Replace("\\?", ".") + "$";
-            
+
             return Regex.IsMatch(input, regexPattern, RegexOptions.IgnoreCase);
         }
     }

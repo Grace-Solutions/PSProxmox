@@ -1,7 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Management.Automation;
+using Newtonsoft.Json.Linq;
+using PSProxmox.Client;
 using PSProxmox.Models;
 using PSProxmox.Session;
+using PSProxmox.Utilities;
 
 namespace PSProxmox.Cmdlets
 {
@@ -44,9 +48,10 @@ namespace PSProxmox.Cmdlets
 
             try
             {
-                var response = Connection.PostJson($"/nodes/{Node}/lxc/{CTID}/status/start", null);
-                var data = response["data"];
-                var taskId = (string)data["upid"];
+                var client = GetProxmoxClient();
+                var response = client.Post($"nodes/{Node}/lxc/{CTID}/status/start", new Dictionary<string, string>());
+                var responseData = JsonUtility.DeserializeResponse<JObject>(response);
+                var taskId = responseData["upid"]?.ToString();
 
                 if (Wait.IsPresent)
                 {
@@ -73,19 +78,20 @@ namespace PSProxmox.Cmdlets
 
         private string WaitForTask(string node, string taskId)
         {
+            var client = GetProxmoxClient();
             var status = "";
             var attempts = 0;
             var maxAttempts = 60; // Wait up to 60 seconds
 
             while (attempts < maxAttempts)
             {
-                var response = Connection.GetJson($"/nodes/{node}/tasks/{taskId}/status");
-                var data = response["data"];
-                status = (string)data["status"];
+                var response = client.Get($"nodes/{node}/tasks/{taskId}/status");
+                var data = JsonUtility.DeserializeResponse<JObject>(response);
+                status = data["status"]?.ToString();
 
                 if (status == "stopped")
                 {
-                    return (string)data["exitstatus"];
+                    return data["exitstatus"]?.ToString() ?? "OK";
                 }
 
                 System.Threading.Thread.Sleep(1000);
@@ -97,13 +103,13 @@ namespace PSProxmox.Cmdlets
 
         private ProxmoxContainer GetContainer(string node, int ctid)
         {
-            var response = Connection.GetJson($"/nodes/{node}/lxc/{ctid}/status/current");
-            var data = response["data"];
-            
-            var container = data.ToObject<ProxmoxContainer>();
+            var client = GetProxmoxClient();
+            var response = client.Get($"nodes/{node}/lxc/{ctid}/status/current");
+            var container = JsonUtility.DeserializeResponse<ProxmoxContainer>(response);
+
             container.Node = node;
             container.CTID = ctid;
-            
+
             return container;
         }
     }

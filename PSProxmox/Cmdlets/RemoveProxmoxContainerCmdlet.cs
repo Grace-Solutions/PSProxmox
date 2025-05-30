@@ -1,6 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Management.Automation;
+using Newtonsoft.Json.Linq;
+using PSProxmox.Client;
 using PSProxmox.Session;
+using PSProxmox.Utilities;
 
 namespace PSProxmox.Cmdlets
 {
@@ -48,16 +52,17 @@ namespace PSProxmox.Cmdlets
             {
                 if (ShouldProcess($"Container {CTID} on node {Node}", "Remove"))
                 {
-                    var parameters = new System.Collections.Generic.Dictionary<string, object>();
-                    
+                    var client = GetProxmoxClient();
+                    var endpoint = $"nodes/{Node}/lxc/{CTID}";
+
                     if (Force.IsPresent)
                     {
-                        parameters["force"] = 1;
+                        endpoint += "?force=1";
                     }
 
-                    var response = Connection.DeleteJson($"/nodes/{Node}/lxc/{CTID}", parameters);
-                    var data = response["data"];
-                    var taskId = (string)data["upid"];
+                    var response = client.Delete(endpoint);
+                    var responseData = JsonUtility.DeserializeResponse<JObject>(response);
+                    var taskId = responseData["upid"]?.ToString();
 
                     var taskStatus = WaitForTask(Node, taskId);
                     if (taskStatus != "OK")
@@ -76,19 +81,20 @@ namespace PSProxmox.Cmdlets
 
         private string WaitForTask(string node, string taskId)
         {
+            var client = GetProxmoxClient();
             var status = "";
             var attempts = 0;
             var maxAttempts = 60; // Wait up to 60 seconds
 
             while (attempts < maxAttempts)
             {
-                var response = Connection.GetJson($"/nodes/{node}/tasks/{taskId}/status");
-                var data = response["data"];
-                status = (string)data["status"];
+                var response = client.Get($"nodes/{node}/tasks/{taskId}/status");
+                var data = JsonUtility.DeserializeResponse<JObject>(response);
+                status = data["status"]?.ToString();
 
                 if (status == "stopped")
                 {
-                    return (string)data["exitstatus"];
+                    return data["exitstatus"]?.ToString() ?? "OK";
                 }
 
                 System.Threading.Thread.Sleep(1000);

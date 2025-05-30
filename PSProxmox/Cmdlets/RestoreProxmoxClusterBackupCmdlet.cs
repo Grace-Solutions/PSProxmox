@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Management.Automation;
+using Newtonsoft.Json.Linq;
 using PSProxmox.Client;
 using PSProxmox.Models;
 using PSProxmox.Session;
@@ -80,8 +81,8 @@ namespace PSProxmox.Cmdlets
 
                 WriteVerbose($"Restoring cluster backup {BackupID}");
                 string response = client.Post("cluster/backup/restore", parameters);
-                var taskData = PSProxmox.Utilities.JsonUtility.DeserializeResponse<dynamic>(response);
-                string taskId = taskData.data;
+                var taskData = PSProxmox.Utilities.JsonUtility.DeserializeResponse<JObject>(response);
+                string taskId = taskData["data"]?.ToString();
 
                 if (Wait.IsPresent && !string.IsNullOrEmpty(taskId))
                 {
@@ -93,8 +94,8 @@ namespace PSProxmox.Cmdlets
                     while (attempts < maxAttempts)
                     {
                         string taskResponse = client.Get($"nodes/{Connection.Server}/tasks/{taskId}/status");
-                        var taskStatus = PSProxmox.Utilities.JsonUtility.DeserializeResponse<dynamic>(taskResponse);
-                        string status = taskStatus.data.status;
+                        var taskStatus = PSProxmox.Utilities.JsonUtility.DeserializeResponse<JObject>(taskResponse);
+                        string status = taskStatus["data"]?["status"]?.ToString();
 
                         if (status == "stopped")
                         {

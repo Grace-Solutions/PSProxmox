@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
 using System.Security;
+using Newtonsoft.Json.Linq;
+using PSProxmox.Client;
 using PSProxmox.Models;
 using PSProxmox.Session;
+using PSProxmox.Utilities;
 
 namespace PSProxmox.Cmdlets
 {
@@ -126,10 +129,10 @@ namespace PSProxmox.Cmdlets
                         Name = Template,
                         Storage = Storage
                     };
-                    
+
                     var result = InvokeCommand.InvokeScript(false, ScriptBlock.Create("param($cmdlet) & { $cmdlet.ProcessRecord(); return $cmdlet.CommandRuntime.ToString() }"), null, downloadCmdlet).FirstOrDefault();
                     templatePath = result?.ToString();
-                    
+
                     if (string.IsNullOrEmpty(templatePath))
                     {
                         throw new Exception($"Failed to download template '{Template}'");
@@ -137,25 +140,26 @@ namespace PSProxmox.Cmdlets
                 }
 
                 // Create the container
-                var parameters = new Dictionary<string, object>
+                var client = GetProxmoxClient();
+                var parameters = new Dictionary<string, string>
                 {
                     { "hostname", Name },
                     { "ostemplate", templatePath },
                     { "storage", Storage },
-                    { "memory", Memory },
-                    { "swap", Swap },
-                    { "cores", Cores },
+                    { "memory", Memory.ToString() },
+                    { "swap", Swap.ToString() },
+                    { "cores", Cores.ToString() },
                     { "rootfs", $"{Storage}:{DiskSize}" }
                 };
 
                 if (CTID.HasValue)
                 {
-                    parameters["vmid"] = CTID.Value;
+                    parameters["vmid"] = CTID.Value.ToString();
                 }
 
                 if (Unprivileged.IsPresent)
                 {
-                    parameters["unprivileged"] = 1;
+                    parameters["unprivileged"] = "1";
                 }
 
                 if (Password != null)
@@ -170,20 +174,20 @@ namespace PSProxmox.Cmdlets
 
                 if (StartOnBoot.IsPresent)
                 {
-                    parameters["onboot"] = 1;
+                    parameters["onboot"] = "1";
                 }
 
                 if (Start.IsPresent)
                 {
-                    parameters["start"] = 1;
+                    parameters["start"] = "1";
                 }
 
-                var response = Connection.PostJson($"/nodes/{Node}/lxc", parameters);
-                var data = response["data"];
-                var ctid = (int)data["vmid"];
+                var response = client.Post($"nodes/{Node}/lxc", parameters);
+                var responseData = JsonUtility.DeserializeResponse<JObject>(response);
+                var ctid = int.Parse(responseData["vmid"]?.ToString() ?? "0");
 
                 // Wait for the task to complete
-                var taskId = (string)data["upid"];
+                var taskId = responseData["upid"]?.ToString();
                 var taskStatus = WaitForTask(Node, taskId);
 
                 if (taskStatus != "OK")
@@ -205,15 +209,16 @@ namespace PSProxmox.Cmdlets
         {
             try
             {
-                var response = Connection.GetJson($"/nodes/{node}/storage/{storage}/content");
-                var data = response["data"];
-                
+                var client = GetProxmoxClient();
+                var response = client.Get($"nodes/{node}/storage/{storage}/content");
+                var data = JsonUtility.DeserializeResponse<JArray>(response);
+
                 foreach (var item in data)
                 {
-                    if (item["content"] != null && item["content"].ToString() == "vztmpl" && 
-                        item["volid"] != null && item["volid"].ToString().Contains(templateName))
+                    if (item["content"]?.ToString() == "vztmpl" &&
+                        item["volid"]?.ToString()?.Contains(templateName) == true)
                     {
-                        return item["volid"].ToString();
+                        return item["volid"]?.ToString();
                     }
                 }
             }
@@ -221,25 +226,26 @@ namespace PSProxmox.Cmdlets
             {
                 // Ignore errors and return null
             }
-            
+
             return null;
         }
 
         private string WaitForTask(string node, string taskId)
         {
+            var client = GetProxmoxClient();
             var status = "";
             var attempts = 0;
             var maxAttempts = 60; // Wait up to 60 seconds
 
             while (attempts < maxAttempts)
             {
-                var response = Connection.GetJson($"/nodes/{node}/tasks/{taskId}/status");
-                var data = response["data"];
-                status = (string)data["status"];
+                var response = client.Get($"nodes/{node}/tasks/{taskId}/status");
+                var data = JsonUtility.DeserializeResponse<JObject>(response);
+                status = data["status"]?.ToString();
 
                 if (status == "stopped")
                 {
-                    return (string)data["exitstatus"];
+                    return data["exitstatus"]?.ToString() ?? "OK";
                 }
 
                 System.Threading.Thread.Sleep(1000);
@@ -251,13 +257,13 @@ namespace PSProxmox.Cmdlets
 
         private ProxmoxContainer GetContainer(string node, int ctid)
         {
-            var response = Connection.GetJson($"/nodes/{node}/lxc/{ctid}/status/current");
-            var data = response["data"];
-            
-            var container = data.ToObject<ProxmoxContainer>();
+            var client = GetProxmoxClient();
+            var response = client.Get($"nodes/{node}/lxc/{ctid}/status/current");
+            var container = JsonUtility.DeserializeResponse<ProxmoxContainer>(response);
+
             container.Node = node;
             container.CTID = ctid;
-            
+
             return container;
         }
 

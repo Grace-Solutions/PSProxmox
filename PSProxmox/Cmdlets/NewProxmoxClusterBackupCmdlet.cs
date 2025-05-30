@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Management.Automation;
+using Newtonsoft.Json.Linq;
 using PSProxmox.Client;
 using PSProxmox.Models;
 using PSProxmox.Session;
@@ -63,8 +64,8 @@ namespace PSProxmox.Cmdlets
 
                 WriteVerbose("Creating cluster backup");
                 string response = client.Post("cluster/backup", parameters);
-                var taskData = JsonUtility.DeserializeResponse<dynamic>(response);
-                string taskId = taskData.data;
+                var taskData = JsonUtility.DeserializeResponse<JObject>(response);
+                string taskId = taskData["data"]?.ToString();
 
                 if (Wait.IsPresent && !string.IsNullOrEmpty(taskId))
                 {
@@ -76,8 +77,8 @@ namespace PSProxmox.Cmdlets
                     while (attempts < maxAttempts)
                     {
                         string taskResponse = client.Get($"nodes/{Connection.Server}/tasks/{taskId}/status");
-                        var taskStatus = JsonUtility.DeserializeResponse<dynamic>(taskResponse);
-                        string status = taskStatus.data.status;
+                        var taskStatus = JsonUtility.DeserializeResponse<JObject>(taskResponse);
+                        string status = taskStatus["data"]?["status"]?.ToString();
 
                         if (status == "stopped")
                         {
@@ -101,22 +102,22 @@ namespace PSProxmox.Cmdlets
 
                 // Get the latest backup
                 string backupsResponse = client.Get("cluster/backup");
-                var backupsData = JsonUtility.DeserializeResponse<dynamic>(backupsResponse);
-                var backups = backupsData.data;
+                var backupsData = JsonUtility.DeserializeResponse<JObject>(backupsResponse);
+                var backups = backupsData["data"] as JArray;
 
-                if (backups.Count > 0)
+                if (backups != null && backups.Count > 0)
                 {
-                    var latestBackup = backups[0];
+                    var latestBackup = backups[0] as JObject;
                     var backup = new ProxmoxClusterBackup
                     {
-                        BackupID = latestBackup["backup-id"],
-                        Time = latestBackup["time"],
-                        Type = latestBackup["type"],
-                        Version = latestBackup["version"],
-                        Size = latestBackup["size"],
-                        Compression = latestBackup["compression"],
-                        Node = latestBackup["node"],
-                        Path = latestBackup["path"]
+                        BackupID = latestBackup?["backup-id"]?.ToString(),
+                        Time = long.TryParse(latestBackup?["time"]?.ToString(), out long time) ? time : 0,
+                        Type = latestBackup?["type"]?.ToString(),
+                        Version = latestBackup?["version"]?.ToString(),
+                        Size = long.TryParse(latestBackup?["size"]?.ToString(), out long size) ? size : 0,
+                        Compression = latestBackup?["compression"]?.ToString(),
+                        Node = latestBackup?["node"]?.ToString(),
+                        Path = latestBackup?["path"]?.ToString()
                     };
 
                     WriteObject(backup);

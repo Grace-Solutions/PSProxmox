@@ -70,7 +70,7 @@ namespace PSProxmox.Cmdlets
         /// <para type="description">The connection to the Proxmox VE server.</para>
         /// </summary>
         [Parameter(Mandatory = false)]
-        public ProxmoxConnection Connection { get; set; }
+        public new ProxmoxConnection Connection { get; set; }
 
         /// <summary>
         /// Processes the cmdlet.

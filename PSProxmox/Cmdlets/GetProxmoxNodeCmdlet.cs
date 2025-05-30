@@ -31,7 +31,7 @@ namespace PSProxmox.Cmdlets
         /// <para type="description">The connection to the Proxmox VE server.</para>
         /// </summary>
         [Parameter(Mandatory = true, Position = 0)]
-        public ProxmoxConnection Connection { get; set; }
+        public new ProxmoxConnection Connection { get; set; }
 
         /// <summary>
         /// <para type="description">The name of the node to retrieve. Supports wildcards and regex when used with -UseRegex.</para>

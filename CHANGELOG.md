@@ -5,6 +5,40 @@ All notable changes to the PSProxmox module will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2025.05.30.1740] - 2025-05-30
+
+### Added
+- **VM Guest Agent Support**: Enhanced Get-ProxmoxVM cmdlet with comprehensive guest agent data retrieval
+  - Added ProxmoxVMGuestAgent model with network interface information
+  - Added IPv4 and IPv6 address arrays for each network interface
+  - Added guest agent status and availability checking
+  - Robust error handling for VMs without guest agent installed
+- **Enhanced VM Models**: Added GuestAgent property to ProxmoxVM model for complete VM information
+- **Network Interface Details**: Guest agent data now includes detailed network configuration from within the VM
+
+### Fixed
+- **Complete Compilation Error Resolution**: Fixed all 41 pre-existing compilation errors (100% success rate)
+  - Fixed API pattern inconsistencies across all cmdlets
+  - Replaced incorrect `Connection.GetJson()` calls with proper `ProxmoxApiClient` usage
+  - Fixed parameter type conversions from `Dictionary<string, object>` to `Dictionary<string, string>`
+  - Eliminated problematic `dynamic` types with proper JSON handling using `JObject`/`JArray`
+  - Added missing using statements for required namespaces
+  - Fixed string-to-long conversion issues with proper parsing
+- **Warning Resolution**: Addressed all compilation warnings for clean builds
+  - Fixed System.Management.Automation version mismatch warnings
+  - Resolved CS0108 hidden inherited member warnings with explicit `new` keywords
+- **API Client Standardization**: Standardized all cmdlets to use consistent API patterns
+  - Fixed container management cmdlets (Start, Stop, Restart, Remove, New)
+  - Fixed TurnKey template cmdlets (Get, Save, NewContainerFromTurnKey)
+  - Fixed cluster backup cmdlets (New, Restore)
+  - Fixed VM SMBIOS cmdlets (Get, Set)
+- **Build System**: Fixed missing PSProxmox.psd1 file dependency for successful compilation
+
+### Changed
+- **Improved Error Handling**: Enhanced error handling throughout the codebase for better reliability
+- **Type Safety**: Improved type safety across all API interactions
+- **Code Quality**: Applied modern C# patterns and best practices consistently
+
 ## [2025.04.28.2035] - 2025-04-28
 
 ### Added

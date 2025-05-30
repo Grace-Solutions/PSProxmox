@@ -67,3 +67,8 @@ This directory contains example scripts for the PSProxmox module.
 - [Create a new IP pool](IP-CreatePool.ps1)
 - [Get information about IP pools](IP-GetPools.ps1)
 - [Clear an IP pool](IP-ClearPool.ps1)
+
+## VM Guest Agent Examples
+
+- [Working with VM Guest Agent data](VM-GuestAgent-Examples.ps1) - Comprehensive examples of guest agent functionality
+- [SMBIOS configuration examples](SMBIOS-Examples.ps1) - Examples of working with VM SMBIOS settings

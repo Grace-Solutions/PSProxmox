@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Management.Automation;
+using PSProxmox.Client;
 using PSProxmox.Models;
 using PSProxmox.Session;
+using PSProxmox.Utilities;
 
 namespace PSProxmox.Cmdlets
 {
@@ -119,9 +121,9 @@ namespace PSProxmox.Cmdlets
 
                 // Get current settings first (for all parameter sets)
                 string response = client.Get($"nodes/{Node}/qemu/{VMID}/config");
-                var configData = JsonUtility.DeserializeResponse<dynamic>(response);
+                var configData = JsonUtility.DeserializeResponse<Newtonsoft.Json.Linq.JObject>(response);
 
-                string currentSmbiosString = configData.data.smbios;
+                string currentSmbiosString = configData?.GetValue("smbios1")?.ToString();
                 var currentSmbios = string.IsNullOrEmpty(currentSmbiosString)
                     ? new ProxmoxVMSMBIOS()
                     : ProxmoxVMSMBIOS.FromProxmoxString(currentSmbiosString);
@@ -186,7 +188,7 @@ namespace PSProxmox.Cmdlets
                 // Update the VM configuration
                 var parameters = new Dictionary<string, string>
                 {
-                    ["smbios"] = smbiosString
+                    ["smbios1"] = smbiosString
                 };
 
                 client.Put($"nodes/{Node}/qemu/{VMID}/config", parameters);

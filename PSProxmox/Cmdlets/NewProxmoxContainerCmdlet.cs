@@ -2,8 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Management.Automation;
 using System.Security;
+using Newtonsoft.Json.Linq;
+using PSProxmox.Client;
 using PSProxmox.Models;
 using PSProxmox.Session;
+using PSProxmox.Utilities;
 
 namespace PSProxmox.Cmdlets
 {
@@ -138,17 +141,22 @@ namespace PSProxmox.Cmdlets
 
             try
             {
-                Dictionary<string, object> parameters;
+                var client = GetProxmoxClient();
+                Dictionary<string, string> parameters;
 
                 if (Builder != null)
                 {
-                    // Use the builder parameters
-                    parameters = Builder.Parameters;
+                    // Convert builder parameters to string dictionary
+                    parameters = new Dictionary<string, string>();
+                    foreach (var kvp in Builder.Parameters)
+                    {
+                        parameters[kvp.Key] = kvp.Value?.ToString() ?? "";
+                    }
                 }
                 else
                 {
                     // Build parameters from individual properties
-                    parameters = new Dictionary<string, object>();
+                    parameters = new Dictionary<string, string>();
 
                     if (!string.IsNullOrEmpty(Name))
                     {
@@ -167,17 +175,17 @@ namespace PSProxmox.Cmdlets
 
                     if (Memory.HasValue)
                     {
-                        parameters["memory"] = Memory.Value;
+                        parameters["memory"] = Memory.Value.ToString();
                     }
 
                     if (Swap.HasValue)
                     {
-                        parameters["swap"] = Swap.Value;
+                        parameters["swap"] = Swap.Value.ToString();
                     }
 
                     if (Cores.HasValue)
                     {
-                        parameters["cores"] = Cores.Value;
+                        parameters["cores"] = Cores.Value.ToString();
                     }
 
                     if (DiskSize.HasValue && !string.IsNullOrEmpty(Storage))
@@ -187,7 +195,7 @@ namespace PSProxmox.Cmdlets
 
                     if (Unprivileged.IsPresent)
                     {
-                        parameters["unprivileged"] = 1;
+                        parameters["unprivileged"] = "1";
                     }
 
                     if (Password != null)
@@ -207,28 +215,28 @@ namespace PSProxmox.Cmdlets
 
                     if (StartOnBoot.IsPresent)
                     {
-                        parameters["onboot"] = 1;
+                        parameters["onboot"] = "1";
                     }
 
                     if (Start.IsPresent)
                     {
-                        parameters["start"] = 1;
+                        parameters["start"] = "1";
                     }
                 }
 
                 // Add CTID if specified
                 if (CTID.HasValue)
                 {
-                    parameters["vmid"] = CTID.Value;
+                    parameters["vmid"] = CTID.Value.ToString();
                 }
 
                 // Create the container
-                var response = Connection.PostJson($"/nodes/{Node}/lxc", parameters);
-                var data = response["data"];
-                var ctid = (int)data["vmid"];
+                var response = client.Post($"nodes/{Node}/lxc", parameters);
+                var responseData = JsonUtility.DeserializeResponse<JObject>(response);
+                var ctid = int.Parse(responseData["vmid"]?.ToString() ?? "0");
 
                 // Wait for the task to complete
-                var taskId = (string)data["upid"];
+                var taskId = responseData["upid"]?.ToString();
                 var taskStatus = WaitForTask(Node, taskId);
 
                 if (taskStatus != "OK")
@@ -248,19 +256,20 @@ namespace PSProxmox.Cmdlets
 
         private string WaitForTask(string node, string taskId)
         {
+            var client = GetProxmoxClient();
             var status = "";
             var attempts = 0;
             var maxAttempts = 60; // Wait up to 60 seconds
 
             while (attempts < maxAttempts)
             {
-                var response = Connection.GetJson($"/nodes/{node}/tasks/{taskId}/status");
-                var data = response["data"];
-                status = (string)data["status"];
+                var response = client.Get($"nodes/{node}/tasks/{taskId}/status");
+                var data = JsonUtility.DeserializeResponse<JObject>(response);
+                status = data["status"]?.ToString();
 
                 if (status == "stopped")
                 {
-                    return (string)data["exitstatus"];
+                    return data["exitstatus"]?.ToString() ?? "OK";
                 }
 
                 System.Threading.Thread.Sleep(1000);
@@ -272,13 +281,13 @@ namespace PSProxmox.Cmdlets
 
         private ProxmoxContainer GetContainer(string node, int ctid)
         {
-            var response = Connection.GetJson($"/nodes/{node}/lxc/{ctid}/status/current");
-            var data = response["data"];
-            
-            var container = data.ToObject<ProxmoxContainer>();
+            var client = GetProxmoxClient();
+            var response = client.Get($"nodes/{node}/lxc/{ctid}/status/current");
+            var container = JsonUtility.DeserializeResponse<ProxmoxContainer>(response);
+
             container.Node = node;
             container.CTID = ctid;
-            
+
             return container;
         }
 

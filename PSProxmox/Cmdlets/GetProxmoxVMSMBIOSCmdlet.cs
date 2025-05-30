@@ -1,8 +1,10 @@
 using System;
 using System.Management.Automation;
 using Newtonsoft.Json.Linq;
+using PSProxmox.Client;
 using PSProxmox.Models;
 using PSProxmox.Session;
+using PSProxmox.Utilities;
 
 namespace PSProxmox.Cmdlets
 {
@@ -63,9 +65,7 @@ namespace PSProxmox.Cmdlets
 
                 // Extract SMBIOS settings
                 var smbios = new ProxmoxVMSMBIOS();
-                if (configData.TryGetValue("data", out JToken dataToken) && 
-                    dataToken is JObject data && 
-                    data.TryGetValue("smbios", out JToken smbiosToken))
+                if (configData != null && configData.TryGetValue("smbios1", out JToken smbiosToken))
                 {
                     string smbiosString = smbiosToken.ToString();
                     smbios = ProxmoxVMSMBIOS.FromProxmoxString(smbiosString);

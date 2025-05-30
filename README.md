@@ -6,6 +6,7 @@ PSProxmox is a C#-based PowerShell module for managing Proxmox VE clusters. It p
 
 - **Session Management**: Authenticate and persist sessions with Proxmox VE clusters
 - **Core CRUD Operations**: Manage VMs, LXC Containers, Storage, Network, Users, Roles, SDN, and Clusters
+- **VM Guest Agent Support**: Comprehensive guest agent data retrieval with network interface information
 - **Templates**: Create and use VM deployment templates
 - **Cloud Images**: Download, customize, and create templates from cloud images
 - **Cloud-Init Support**: Configure VMs with Cloud-Init for easy customization
@@ -15,6 +16,7 @@ PSProxmox is a C#-based PowerShell module for managing Proxmox VE clusters. It p
 - **IP Management**: CIDR parsing, subnetting, FIFO IP queue assignment
 - **Structured Objects**: All outputs are typed C# classes (PowerShell-native)
 - **Pipeline Support**: Cmdlets support pipeline input where appropriate
+- **Clean Codebase**: 100% compilation success with zero errors and warnings
 
 ## Project Structure
 
@@ -94,6 +96,52 @@ Restart-ProxmoxVM -Node "pve1" -VMID 100
 
 # Remove a VM
 Remove-ProxmoxVM -Node "pve1" -VMID 100 -Confirm:$false
+```
+
+### Working with VM Guest Agent
+
+```powershell
+# Get VM with guest agent information
+$vm = Get-ProxmoxVM -VMID 100
+
+# Check if guest agent is available and running
+if ($vm.GuestAgent -and $vm.GuestAgent.Status -eq "running") {
+    Write-Host "Guest Agent is running"
+
+    # Display network interfaces from guest agent
+    foreach ($interface in $vm.GuestAgent.NetIf) {
+        Write-Host "Interface: $($interface.Name)"
+        Write-Host "  IPv4 Addresses: $($interface.IPv4Addresses -join ', ')"
+        Write-Host "  IPv6 Addresses: $($interface.IPv6Addresses -join ', ')"
+        Write-Host "  MAC Address: $($interface.MacAddress)"
+    }
+} else {
+    Write-Host "Guest Agent not available or not running"
+}
+
+# Get all VMs with active guest agents
+$vmsWithGuestAgent = Get-ProxmoxVM | Where-Object {
+    $_.GuestAgent -and $_.GuestAgent.Status -eq "running"
+}
+
+# Find VMs by IP address using guest agent data
+$searchIP = "192.168.1.100"
+$foundVMs = $vmsWithGuestAgent | Where-Object {
+    $vm = $_
+    $found = $false
+
+    if ($vm.GuestAgent.NetIf) {
+        foreach ($interface in $vm.GuestAgent.NetIf) {
+            if ($interface.IPv4Addresses -contains $searchIP -or
+                $interface.IPv6Addresses -contains $searchIP) {
+                $found = $true
+                break
+            }
+        }
+    }
+
+    return $found
+}
 ```
 
 ### Managing Templates

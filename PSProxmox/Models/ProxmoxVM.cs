@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace PSProxmox.Models
@@ -79,6 +80,12 @@ namespace PSProxmox.Models
         /// </summary>
         [JsonProperty("tags")]
         public string Tags { get; set; }
+
+        /// <summary>
+        /// Gets or sets the VM guest agent information.
+        /// </summary>
+        [JsonIgnore]
+        public ProxmoxVMGuestAgent GuestAgent { get; set; }
 
         /// <summary>
         /// Gets a value indicating whether the VM is a template.
