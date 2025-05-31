@@ -13,25 +13,25 @@ Write-Host "=== PSProxmox VM Guest Agent Examples ===" -ForegroundColor Green
 # Example 1: Get a specific VM with guest agent information
 Write-Host "`n1. Getting VM with Guest Agent Information" -ForegroundColor Yellow
 $vmid = 100  # Change this to your VM ID
-$vm = Get-ProxmoxVM -VMID $vmid
+$vm = Get-ProxmoxVM -VMID $vmid -IncludeGuestAgent
 
 if ($vm) {
     Write-Host "VM: $($vm.Name) (ID: $($vm.VMID))" -ForegroundColor Cyan
-    
+
     if ($vm.GuestAgent) {
         Write-Host "Guest Agent Status: $($vm.GuestAgent.Status)" -ForegroundColor Green
-        
+
         if ($vm.GuestAgent.Status -eq "running" -and $vm.GuestAgent.NetIf) {
             Write-Host "Network Interfaces from Guest Agent:" -ForegroundColor Green
-            
+
             foreach ($interface in $vm.GuestAgent.NetIf) {
                 Write-Host "  Interface: $($interface.Name)" -ForegroundColor White
                 Write-Host "    MAC Address: $($interface.MacAddress)" -ForegroundColor Gray
-                
+
                 if ($interface.IPv4Addresses -and $interface.IPv4Addresses.Count -gt 0) {
                     Write-Host "    IPv4 Addresses: $($interface.IPv4Addresses -join ', ')" -ForegroundColor Gray
                 }
-                
+
                 if ($interface.IPv6Addresses -and $interface.IPv6Addresses.Count -gt 0) {
                     Write-Host "    IPv6 Addresses: $($interface.IPv6Addresses -join ', ')" -ForegroundColor Gray
                 }
@@ -49,7 +49,7 @@ if ($vm) {
 
 # Example 2: Get all VMs and show guest agent status
 Write-Host "`n2. Guest Agent Status for All VMs" -ForegroundColor Yellow
-$allVMs = Get-ProxmoxVM
+$allVMs = Get-ProxmoxVM -IncludeGuestAgent
 
 Write-Host "VM Guest Agent Status Summary:" -ForegroundColor Cyan
 $guestAgentStats = @{
@@ -61,7 +61,7 @@ $guestAgentStats = @{
 foreach ($vm in $allVMs) {
     $status = "Not Available"
     $color = "Red"
-    
+
     if ($vm.GuestAgent) {
         if ($vm.GuestAgent.Status -eq "running") {
             $status = "Running"
@@ -75,7 +75,7 @@ foreach ($vm in $allVMs) {
     } else {
         $guestAgentStats.NotAvailable++
     }
-    
+
     Write-Host "  $($vm.Name) (ID: $($vm.VMID)): $status" -ForegroundColor $color
 }
 
@@ -86,21 +86,21 @@ Write-Host "  Not Available: $($guestAgentStats.NotAvailable)" -ForegroundColor 
 
 # Example 3: Filter VMs with active guest agents
 Write-Host "`n3. VMs with Active Guest Agents" -ForegroundColor Yellow
-$vmsWithActiveGA = $allVMs | Where-Object { 
-    $_.GuestAgent -and $_.GuestAgent.Status -eq "running" 
+$vmsWithActiveGA = $allVMs | Where-Object {
+    $_.GuestAgent -and $_.GuestAgent.Status -eq "running"
 }
 
 if ($vmsWithActiveGA.Count -gt 0) {
     Write-Host "VMs with active Guest Agents:" -ForegroundColor Green
-    
+
     foreach ($vm in $vmsWithActiveGA) {
         Write-Host "  $($vm.Name) (ID: $($vm.VMID))" -ForegroundColor White
-        
+
         if ($vm.GuestAgent.NetIf) {
-            $totalIPs = ($vm.GuestAgent.NetIf | ForEach-Object { 
-                $_.IPv4Addresses.Count + $_.IPv6Addresses.Count 
+            $totalIPs = ($vm.GuestAgent.NetIf | ForEach-Object {
+                $_.IPv4Addresses.Count + $_.IPv6Addresses.Count
             } | Measure-Object -Sum).Sum
-            
+
             Write-Host "    Network Interfaces: $($vm.GuestAgent.NetIf.Count)" -ForegroundColor Gray
             Write-Host "    Total IP Addresses: $totalIPs" -ForegroundColor Gray
         }
@@ -126,7 +126,7 @@ foreach ($vm in $vmsWithActiveGA) {
                     IPVersion = "IPv4"
                 }
             }
-            
+
             foreach ($ipv6 in $interface.IPv6Addresses) {
                 $networkData += [PSCustomObject]@{
                     VMName = $vm.Name
@@ -158,17 +158,17 @@ Write-Host "Searching for VMs with IP address: $searchIP" -ForegroundColor Cyan
 $foundVMs = $vmsWithActiveGA | Where-Object {
     $vm = $_
     $found = $false
-    
+
     if ($vm.GuestAgent.NetIf) {
         foreach ($interface in $vm.GuestAgent.NetIf) {
-            if ($interface.IPv4Addresses -contains $searchIP -or 
+            if ($interface.IPv4Addresses -contains $searchIP -or
                 $interface.IPv6Addresses -contains $searchIP) {
                 $found = $true
                 break
             }
         }
     }
-    
+
     return $found
 }
 
@@ -180,6 +180,21 @@ if ($foundVMs.Count -gt 0) {
 } else {
     Write-Host "No VMs found with IP address $searchIP" -ForegroundColor Yellow
 }
+
+# Example 6: Performance comparison
+Write-Host "`n6. Performance Comparison" -ForegroundColor Yellow
+Write-Host "Comparing query performance with and without guest agent data:" -ForegroundColor Cyan
+
+# Fast query without guest agent information
+$fastTime = Measure-Command { $fastVMs = Get-ProxmoxVM }
+Write-Host "Fast query (without guest agent): $($fastTime.TotalSeconds) seconds" -ForegroundColor Green
+
+# Slower query with guest agent information
+$slowTime = Measure-Command { $slowVMs = Get-ProxmoxVM -IncludeGuestAgent }
+Write-Host "Detailed query (with guest agent): $($slowTime.TotalSeconds) seconds" -ForegroundColor Yellow
+
+$speedDifference = [math]::Round(($slowTime.TotalSeconds / $fastTime.TotalSeconds), 2)
+Write-Host "Guest agent queries are ${speedDifference}x slower but provide detailed network information" -ForegroundColor Cyan
 
 Write-Host "`n=== Examples Complete ===" -ForegroundColor Green
 

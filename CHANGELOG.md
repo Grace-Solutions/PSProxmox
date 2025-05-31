@@ -5,6 +5,25 @@ All notable changes to the PSProxmox module will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2025.05.30.2323] - 2025-05-30
+
+### Added
+- **Performance Optimization**: Added `-IncludeGuestAgent` parameter to Get-ProxmoxVM cmdlet
+  - Guest agent data retrieval is now optional for improved query performance
+  - Default behavior: Fast queries without guest agent data
+  - Use `-IncludeGuestAgent` switch when detailed network information is needed
+  - Significant performance improvement for normal VM queries
+
+### Changed
+- **Get-ProxmoxVM Behavior**: Guest agent information is no longer fetched by default
+  - Breaking change: Existing scripts that rely on guest agent data must add `-IncludeGuestAgent` parameter
+  - Performance benefit: Default queries are now much faster
+- **Documentation Updates**: All guest agent examples updated to use new parameter
+
+### Fixed
+- **Binary Module Structure**: Removed unnecessary PSProxmox.psd1 file from bin output directory
+- **Project Configuration**: Cleaned up project file references for proper binary module packaging
+
 ## [2025.05.30.1740] - 2025-05-30
 
 ### Added

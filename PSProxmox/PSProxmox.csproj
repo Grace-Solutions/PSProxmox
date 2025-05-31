@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>PSProxmox</AssemblyName>
     <RootNamespace>PSProxmox</RootNamespace>
-    <Version>2025.05.30.1740</Version>
+    <Version>2025.05.30.2323</Version>
     <Authors>PSProxmox Team</Authors>
     <Description>PowerShell module for managing Proxmox VE clusters</Description>
     <Copyright>Copyright © 2023</Copyright>
@@ -17,10 +17,6 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="PSProxmox.psd1">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+
 
 </Project>

@@ -1,5 +1,5 @@
 @{
-    ModuleVersion = '2025.05.30.1740'
+    ModuleVersion = '2025.05.30.2325'
     GUID = 'd24f0894-3d0c-4ef1-a41e-b273c3db86ad'
     Author = 'PSProxmox Team'
     CompanyName = 'PSProxmox'
@@ -106,10 +106,14 @@
             Tags = @('Proxmox', 'VirtualMachine', 'Cluster', 'Management')
             LicenseUri = 'https://github.com/Grace-Solutions/PSProxmox/blob/main/LICENSE'
             ProjectUri = 'https://github.com/Grace-Solutions/PSProxmox'
-            ReleaseNotes = 'Added VM Guest Agent support with comprehensive network interface information. Fixed all 41 compilation errors and warnings for 100% clean builds. Enhanced API client standardization across all cmdlets. See https://github.com/Grace-Solutions/PSProxmox/releases/tag/v2025.05.30.1740'
+            ReleaseNotes = 'Added -IncludeGuestAgent parameter for performance optimization. Guest agent data now optional for faster queries. Fixed binary module structure. Complete codebase stabilization with 100% clean builds. See https://github.com/Grace-Solutions/PSProxmox/releases/tag/v2025.05.30.2323'
         }
     }
 }
+
+
+
+
 
 
 

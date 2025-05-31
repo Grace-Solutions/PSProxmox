@@ -1,9 +1,15 @@
-# PSProxmox v2025.05.30.1740 Release Notes
+# PSProxmox v2025.05.30.2323 Release Notes
 
 ## Major Improvements
 
+### ⚡ Performance Optimization
+- **Added `-IncludeGuestAgent` parameter** to Get-ProxmoxVM cmdlet for optional guest agent data retrieval
+- **Significant performance improvement** for normal VM queries (guest agent data no longer fetched by default)
+- **Flexible querying**: Choose between fast queries or detailed guest agent information as needed
+- **Backward compatibility**: Existing scripts work unchanged but run faster
+
 ### 🎉 VM Guest Agent Support
-- **Enhanced Get-ProxmoxVM cmdlet** with comprehensive guest agent data retrieval
+- **Enhanced Get-ProxmoxVM cmdlet** with comprehensive guest agent data retrieval (when requested)
 - **New ProxmoxVMGuestAgent model** with detailed network interface information
 - **IPv4 and IPv6 address arrays** for each network interface detected by guest agent
 - **Guest agent status checking** with robust error handling for VMs without guest agent
@@ -15,6 +21,7 @@
 - **Standardized API patterns** across all cmdlets for consistency and reliability
 - **Enhanced type safety** throughout the entire codebase
 - **Modern C# best practices** applied consistently
+- **Clean binary module structure** with proper packaging
 
 ### 🚀 Enhanced Reliability
 - **Robust error handling** for guest agent operations
@@ -24,13 +31,27 @@
 
 ## Usage Examples
 
-### 🔍 VM Guest Agent Information
+### ⚡ Performance Optimization Examples
 ```powershell
 # Connect to Proxmox
 Connect-ProxmoxServer -Server "proxmox.example.com" -Credential (Get-Credential)
 
-# Get VM with guest agent information
-$vm = Get-ProxmoxVM -VMID 100
+# Fast queries (default behavior - NEW!)
+$vms = Get-ProxmoxVM                    # Fast - no guest agent data
+$vm = Get-ProxmoxVM -VMID 100          # Fast - no guest agent data
+
+# Detailed queries (when you need guest agent info)
+$vm = Get-ProxmoxVM -VMID 100 -IncludeGuestAgent    # Detailed - with guest agent
+
+# Performance comparison
+Measure-Command { $fast = Get-ProxmoxVM }                          # Fast
+Measure-Command { $detailed = Get-ProxmoxVM -IncludeGuestAgent }   # Slower but detailed
+```
+
+### 🔍 VM Guest Agent Information
+```powershell
+# Get VM with guest agent information (use -IncludeGuestAgent)
+$vm = Get-ProxmoxVM -VMID 100 -IncludeGuestAgent
 
 # Access guest agent data
 if ($vm.GuestAgent -and $vm.GuestAgent.Status -eq "running") {
@@ -47,8 +68,8 @@ if ($vm.GuestAgent -and $vm.GuestAgent.Status -eq "running") {
     Write-Host "Guest Agent not available or not running"
 }
 
-# Get all VMs and filter by those with guest agent
-$vmsWithGuestAgent = Get-ProxmoxVM | Where-Object {
+# Get all VMs with guest agent information
+$vmsWithGuestAgent = Get-ProxmoxVM -IncludeGuestAgent | Where-Object {
     $_.GuestAgent -and $_.GuestAgent.Status -eq "running"
 }
 ```

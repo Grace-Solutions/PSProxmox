@@ -101,8 +101,8 @@ Remove-ProxmoxVM -Node "pve1" -VMID 100 -Confirm:$false
 ### Working with VM Guest Agent
 
 ```powershell
-# Get VM with guest agent information
-$vm = Get-ProxmoxVM -VMID 100
+# Get VM with guest agent information (use -IncludeGuestAgent for detailed network info)
+$vm = Get-ProxmoxVM -VMID 100 -IncludeGuestAgent
 
 # Check if guest agent is available and running
 if ($vm.GuestAgent -and $vm.GuestAgent.Status -eq "running") {
@@ -120,9 +120,13 @@ if ($vm.GuestAgent -and $vm.GuestAgent.Status -eq "running") {
 }
 
 # Get all VMs with active guest agents
-$vmsWithGuestAgent = Get-ProxmoxVM | Where-Object {
+$vmsWithGuestAgent = Get-ProxmoxVM -IncludeGuestAgent | Where-Object {
     $_.GuestAgent -and $_.GuestAgent.Status -eq "running"
 }
+
+# Performance comparison: fast vs detailed queries
+Measure-Command { $fastVMs = Get-ProxmoxVM }  # Fast query
+Measure-Command { $detailedVMs = Get-ProxmoxVM -IncludeGuestAgent }  # Detailed query
 
 # Find VMs by IP address using guest agent data
 $searchIP = "192.168.1.100"

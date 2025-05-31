@@ -12,12 +12,13 @@ Get-ProxmoxVM
    [-Name <String>]
    [-UseRegex]
    [-RawJson]
+   [-IncludeGuestAgent]
    [<CommonParameters>]
 ```
 
 ## Description
 
-The `Get-ProxmoxVM` cmdlet retrieves virtual machines from Proxmox VE with comprehensive information including guest agent data when available. You can retrieve all VMs, VMs on a specific node, or a specific VM by ID. The cmdlet automatically attempts to gather guest agent information for each VM, providing detailed network interface information from within the guest operating system.
+The `Get-ProxmoxVM` cmdlet retrieves virtual machines from Proxmox VE. You can retrieve all VMs, VMs on a specific node, or a specific VM by ID. Use the `-IncludeGuestAgent` parameter to fetch guest agent information, which provides detailed network interface information from within the guest operating system. Note that including guest agent data may slow down queries as it requires additional API calls.
 
 ## Parameters
 
@@ -117,6 +118,22 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -IncludeGuestAgent
+
+Whether to include guest agent information. This may slow down the query as it requires additional API calls.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### CommonParameters
 
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
@@ -200,7 +217,7 @@ This example gets the raw JSON response for all VMs.
 
 ```powershell
 Connect-ProxmoxServer -Server "proxmox.example.com" -Credential (Get-Credential)
-$vm = Get-ProxmoxVM -VMID 100
+$vm = Get-ProxmoxVM -VMID 100 -IncludeGuestAgent
 
 # Check if guest agent is available and running
 if ($vm.GuestAgent -and $vm.GuestAgent.Status -eq "running") {
@@ -218,13 +235,13 @@ if ($vm.GuestAgent -and $vm.GuestAgent.Status -eq "running") {
 }
 ```
 
-This example gets a VM and displays guest agent network information if available.
+This example gets a VM with guest agent information and displays network interface details.
 
 ### Example 8: Filter VMs with active guest agents
 
 ```powershell
 Connect-ProxmoxServer -Server "proxmox.example.com" -Credential (Get-Credential)
-$vmsWithGuestAgent = Get-ProxmoxVM | Where-Object {
+$vmsWithGuestAgent = Get-ProxmoxVM -IncludeGuestAgent | Where-Object {
     $_.GuestAgent -and $_.GuestAgent.Status -eq "running"
 }
 
@@ -233,7 +250,21 @@ foreach ($vm in $vmsWithGuestAgent) {
 }
 ```
 
-This example gets all VMs and filters those with active guest agents.
+This example gets all VMs with guest agent information and filters those with active guest agents.
+
+### Example 9: Performance comparison - with and without guest agent
+
+```powershell
+Connect-ProxmoxServer -Server "proxmox.example.com" -Credential (Get-Credential)
+
+# Fast query without guest agent information
+Measure-Command { $vms = Get-ProxmoxVM }
+
+# Slower query with guest agent information
+Measure-Command { $vmsWithGA = Get-ProxmoxVM -IncludeGuestAgent }
+```
+
+This example demonstrates the performance difference between queries with and without guest agent information.
 
 ## Related Links
 

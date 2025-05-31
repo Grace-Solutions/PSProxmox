@@ -13,7 +13,7 @@ namespace PSProxmox.Cmdlets
 {
     /// <summary>
     /// <para type="synopsis">Gets virtual machines from a Proxmox VE server.</para>
-    /// <para type="description">The Get-ProxmoxVM cmdlet retrieves virtual machines from a Proxmox VE server.</para>
+    /// <para type="description">The Get-ProxmoxVM cmdlet retrieves virtual machines from a Proxmox VE server. Use -IncludeGuestAgent to fetch guest agent information (slower but more detailed).</para>
     /// <example>
     ///   <para>Get all virtual machines</para>
     ///   <code>$vms = Get-ProxmoxVM -Connection $connection</code>
@@ -25,6 +25,10 @@ namespace PSProxmox.Cmdlets
     /// <example>
     ///   <para>Get virtual machines on a specific node</para>
     ///   <code>$vms = Get-ProxmoxVM -Connection $connection -Node "pve1"</code>
+    /// </example>
+    /// <example>
+    ///   <para>Get a virtual machine with guest agent information</para>
+    ///   <code>$vm = Get-ProxmoxVM -VMID 100 -IncludeGuestAgent</code>
     /// </example>
     /// </summary>
     [Cmdlet(VerbsCommon.Get, "ProxmoxVM")]
@@ -55,6 +59,12 @@ namespace PSProxmox.Cmdlets
         /// </summary>
         [Parameter(Mandatory = false)]
         public SwitchParameter RawJson { get; set; }
+
+        /// <summary>
+        /// <para type="description">Whether to include guest agent information. This may slow down the query as it requires additional API calls.</para>
+        /// </summary>
+        [Parameter(Mandatory = false)]
+        public SwitchParameter IncludeGuestAgent { get; set; }
 
         /// <summary>
         /// Fetches guest agent information for a VM.
@@ -239,8 +249,11 @@ namespace PSProxmox.Cmdlets
                                 // Populate NetIf information
                                 PopulateNetIfInfo(client, nodeName, VMID.Value, vm);
 
-                                // Fetch guest agent information
-                                vm.GuestAgent = FetchGuestAgentInfo(client, nodeName, VMID.Value);
+                                // Fetch guest agent information only if requested
+                                if (IncludeGuestAgent.IsPresent)
+                                {
+                                    vm.GuestAgent = FetchGuestAgentInfo(client, nodeName, VMID.Value);
+                                }
 
                                 if (RawJson.IsPresent)
                                 {
@@ -275,8 +288,11 @@ namespace PSProxmox.Cmdlets
                         // Populate NetIf information
                         PopulateNetIfInfo(client, Node, VMID.Value, vm);
 
-                        // Fetch guest agent information
-                        vm.GuestAgent = FetchGuestAgentInfo(client, Node, VMID.Value);
+                        // Fetch guest agent information only if requested
+                        if (IncludeGuestAgent.IsPresent)
+                        {
+                            vm.GuestAgent = FetchGuestAgentInfo(client, Node, VMID.Value);
+                        }
 
                         if (RawJson.IsPresent)
                         {
@@ -315,8 +331,11 @@ namespace PSProxmox.Cmdlets
                                     // Populate NetIf information
                                     PopulateNetIfInfo(client, nodeName, vm.VMID, vm);
 
-                                    // Fetch guest agent information
-                                    vm.GuestAgent = FetchGuestAgentInfo(client, nodeName, vm.VMID);
+                                    // Fetch guest agent information only if requested
+                                    if (IncludeGuestAgent.IsPresent)
+                                    {
+                                        vm.GuestAgent = FetchGuestAgentInfo(client, nodeName, vm.VMID);
+                                    }
 
                                     allVMs.Add(vm);
                                 }
@@ -358,8 +377,11 @@ namespace PSProxmox.Cmdlets
                             // Populate NetIf information
                             PopulateNetIfInfo(client, Node, vm.VMID, vm);
 
-                            // Fetch guest agent information
-                            vm.GuestAgent = FetchGuestAgentInfo(client, Node, vm.VMID);
+                            // Fetch guest agent information only if requested
+                            if (IncludeGuestAgent.IsPresent)
+                            {
+                                vm.GuestAgent = FetchGuestAgentInfo(client, Node, vm.VMID);
+                            }
 
                             nodeVMs.Add(vm);
                         }

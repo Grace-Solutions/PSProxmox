@@ -43,10 +43,17 @@ dotnet build "$rootPath\PSProxmox\PSProxmox.Main.csproj" -c Release -o $releaseB
 
 # Copy the module files to the release directory
 Copy-Item -Path "$rootPath\Module\PSProxmox.psd1" -Destination $releaseVersionDir -Force
-Copy-Item -Path "$rootPath\Module\PSProxmox.psm1" -Destination $releaseVersionDir -Force
 Copy-Item -Path "$rootPath\LICENSE" -Destination $releaseVersionDir -Force
 Copy-Item -Path "$rootPath\README.md" -Destination $releaseVersionDir -Force
 Copy-Item -Path "$scriptRoot\Install-PSProxmox.ps1" -Destination $releaseVersionDir -Force
+
+# Copy the lib directory with dependencies
+$libSourceDir = "$rootPath\Module\lib"
+$libDestDir = "$releaseVersionDir\lib"
+if (Test-Path -Path $libSourceDir) {
+    Copy-Item -Path $libSourceDir -Destination $libDestDir -Recurse -Force
+    Write-Host "Copied lib directory to release"
+}
 
 # Make sure the bin directory exists in the release directory
 if (-not (Test-Path -Path "$releaseVersionDir\bin")) {
