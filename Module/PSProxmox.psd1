@@ -1,5 +1,5 @@
 @{
-    ModuleVersion = '2025.05.30.2325'
+    ModuleVersion = '2025.07.03.1200'
     GUID = 'd24f0894-3d0c-4ef1-a41e-b273c3db86ad'
     Author = 'PSProxmox Team'
     CompanyName = 'PSProxmox'
@@ -29,6 +29,7 @@
         'Get-ProxmoxNode',
         'Get-ProxmoxVM',
         'New-ProxmoxVM',
+        'New-ProxmoxVMBuilder',
         'Remove-ProxmoxVM',
         'Start-ProxmoxVM',
         'Stop-ProxmoxVM',
@@ -97,7 +98,11 @@
         # TurnKey Template Management
         'Get-ProxmoxTurnKeyTemplate',
         'Save-ProxmoxTurnKeyTemplate',
-        'New-ProxmoxContainerFromTurnKey'
+        'New-ProxmoxContainerFromTurnKey',
+
+        # VM SMBIOS Management
+        'Get-ProxmoxVMSMBIOS',
+        'Set-ProxmoxVMSMBIOS'
     )
     VariablesToExport = @()
     AliasesToExport = @()
@@ -106,7 +111,7 @@
             Tags = @('Proxmox', 'VirtualMachine', 'Cluster', 'Management')
             LicenseUri = 'https://github.com/Grace-Solutions/PSProxmox/blob/main/LICENSE'
             ProjectUri = 'https://github.com/Grace-Solutions/PSProxmox'
-            ReleaseNotes = 'Added -IncludeGuestAgent parameter for performance optimization. Guest agent data now optional for faster queries. Fixed binary module structure. Complete codebase stabilization with 100% clean builds. See https://github.com/Grace-Solutions/PSProxmox/releases/tag/v2025.05.30.2323'
+            ReleaseNotes = 'Updated to .NET Standard 2.0 for dual PowerShell 5.1/7+ support. Added missing SMBIOS cmdlets to exports. Complete compatibility with both Windows PowerShell and PowerShell Core. See https://github.com/Grace-Solutions/PSProxmox/releases/tag/v2025.07.03.1200'
         }
     }
 }

@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>PSProxmox</AssemblyName>
     <RootNamespace>PSProxmox</RootNamespace>
-    <Version>2025.05.30.2323</Version>
+    <Version>2025.07.03.1200</Version>
     <Authors>PSProxmox Contributors</Authors>
     <Company>PSProxmox</Company>
     <Description>PowerShell module for managing Proxmox VE clusters</Description>
@@ -23,89 +23,7 @@
     <PackageReference Include="PowerShellStandard.Library" Version="5.1.0" />
   </ItemGroup>
 
-  <PropertyGroup>
-    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Include="Client\ProxmoxApiClient.cs" />
-    <Compile Include="Cmdlets\ClearProxmoxIPPoolCmdlet.cs" />
-    <Compile Include="Cmdlets\ConnectProxmoxServerCmdlet.cs" />
-    <Compile Include="Cmdlets\DisconnectProxmoxServerCmdlet.cs" />
-    <Compile Include="Cmdlets\FilteringCmdlet.cs" />
-    <Compile Include="Cmdlets\ProxmoxCmdlet.cs" />
-    <Compile Include="Cmdlets\GetProxmoxClusterBackupCmdlet.cs" />
-    <Compile Include="Cmdlets\GetProxmoxClusterCmdlet.cs" />
-    <Compile Include="Cmdlets\GetProxmoxIPPoolCmdlet.cs" />
-    <Compile Include="Cmdlets\GetProxmoxNetworkCmdlet.cs" />
-    <Compile Include="Cmdlets\GetProxmoxNodeCmdlet.cs" />
-    <Compile Include="Cmdlets\GetProxmoxRoleCmdlet.cs" />
-    <Compile Include="Cmdlets\GetProxmoxSDNVnetCmdlet.cs" />
-    <Compile Include="Cmdlets\GetProxmoxSDNZoneCmdlet.cs" />
-    <Compile Include="Cmdlets\GetProxmoxStorageCmdlet.cs" />
-    <Compile Include="Cmdlets\GetProxmoxUserCmdlet.cs" />
-    <Compile Include="Cmdlets\GetProxmoxVMCmdlet.cs" />
-    <Compile Include="Cmdlets\GetProxmoxVMTemplateCmdlet.cs" />
-    <Compile Include="Cmdlets\GetProxmoxCloudImageCmdlet.cs" />
-    <Compile Include="Cmdlets\InvokeProxmoxCloudImageCustomizationCmdlet.cs" />
-    <Compile Include="Cmdlets\JoinProxmoxClusterCmdlet.cs" />
-    <Compile Include="Cmdlets\LeaveProxmoxClusterCmdlet.cs" />
-    <Compile Include="Cmdlets\NewProxmoxClusterBackupCmdlet.cs" />
-    <Compile Include="Cmdlets\NewProxmoxIPPoolCmdlet.cs" />
-    <Compile Include="Cmdlets\NewProxmoxNetworkCmdlet.cs" />
-    <Compile Include="Cmdlets\NewProxmoxRoleCmdlet.cs" />
-    <Compile Include="Cmdlets\NewProxmoxSDNVnetCmdlet.cs" />
-    <Compile Include="Cmdlets\NewProxmoxSDNZoneCmdlet.cs" />
-    <Compile Include="Cmdlets\NewProxmoxStorageCmdlet.cs" />
-    <Compile Include="Cmdlets\NewProxmoxUserCmdlet.cs" />
-    <Compile Include="Cmdlets\NewProxmoxVMBuilderCmdlet.cs" />
-    <Compile Include="Cmdlets\NewProxmoxVMCmdlet.cs" />
-    <Compile Include="Cmdlets\NewProxmoxVMFromTemplateCmdlet.cs" />
-    <Compile Include="Cmdlets\NewProxmoxVMTemplateCmdlet.cs" />
-    <Compile Include="Cmdlets\NewProxmoxCloudImageTemplateCmdlet.cs" />
-    <Compile Include="Cmdlets\SaveProxmoxCloudImageCmdlet.cs" />
-    <Compile Include="Cmdlets\SetProxmoxVMCloudInitCmdlet.cs" />
-    <Compile Include="Cmdlets\RemoveProxmoxNetworkCmdlet.cs" />
-    <Compile Include="Cmdlets\RemoveProxmoxRoleCmdlet.cs" />
-    <Compile Include="Cmdlets\RemoveProxmoxSDNVnetCmdlet.cs" />
-    <Compile Include="Cmdlets\RemoveProxmoxSDNZoneCmdlet.cs" />
-    <Compile Include="Cmdlets\RemoveProxmoxStorageCmdlet.cs" />
-    <Compile Include="Cmdlets\RemoveProxmoxUserCmdlet.cs" />
-    <Compile Include="Cmdlets\RemoveProxmoxVMCmdlet.cs" />
-    <Compile Include="Cmdlets\RemoveProxmoxVMTemplateCmdlet.cs" />
-    <Compile Include="Cmdlets\RestartProxmoxVMCmdlet.cs" />
-    <Compile Include="Cmdlets\RestoreProxmoxClusterBackupCmdlet.cs" />
-    <Compile Include="Cmdlets\StartProxmoxVMCmdlet.cs" />
-    <Compile Include="Cmdlets\StopProxmoxVMCmdlet.cs" />
-    <Compile Include="Cmdlets\TestProxmoxConnectionCmdlet.cs" />
-    <Compile Include="CloudImages\CloudImageRepository.cs" />
-    <Compile Include="CloudImages\CloudImageDownloader.cs" />
-    <Compile Include="CloudImages\CloudImageCustomizer.cs" />
-    <Compile Include="IPAM\IPAMManager.cs" />
-    <Compile Include="Models\ProxmoxCluster.cs" />
-    <Compile Include="Models\ProxmoxClusterBackup.cs" />
-    <Compile Include="Models\ProxmoxConnectionInfo.cs" />
-    <Compile Include="Models\ProxmoxIPPool.cs" />
-    <Compile Include="Models\ProxmoxNetwork.cs" />
-    <Compile Include="Models\ProxmoxNode.cs" />
-    <Compile Include="Models\ProxmoxRole.cs" />
-    <Compile Include="Models\ProxmoxResponse.cs" />
-    <Compile Include="Models\ProxmoxSDNVnet.cs" />
-    <Compile Include="Models\ProxmoxSDNZone.cs" />
-    <Compile Include="Models\ProxmoxStorage.cs" />
-    <Compile Include="Models\ProxmoxTicket.cs" />
-    <Compile Include="Models\ProxmoxUser.cs" />
-    <Compile Include="Models\ProxmoxVM.cs" />
-    <Compile Include="Models\ProxmoxVMBuilder.cs" />
-    <Compile Include="Models\ProxmoxVMGuestAgent.cs" />
-    <Compile Include="Models\ProxmoxVMSMBIOS.cs" />
-    <Compile Include="Models\ProxmoxVMSMBIOSProfile.cs" />
-    <Compile Include="Models\ProxmoxVMTemplate.cs" />
-    <Compile Include="Session\ProxmoxConnection.cs" />
-    <Compile Include="Session\ProxmoxSession.cs" />
-    <Compile Include="Templates\TemplateManager.cs" />
-    <Compile Include="Utilities\JsonUtility.cs" />
-  </ItemGroup>
+  <!-- All .cs files are automatically included by default in .NET SDK projects -->
 
 
 
