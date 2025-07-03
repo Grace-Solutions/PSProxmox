@@ -1,6 +1,11 @@
 # build.ps1
 # This script builds the PSProxmox module and creates a release package
 
+param(
+    [switch]$Publish,
+    [string]$NuGetApiKey = $env:NUGET_API_KEY
+)
+
 # Set script root path for relative paths
 $scriptRoot = $PSScriptRoot
 $rootPath = Split-Path -Parent $scriptRoot
@@ -54,7 +59,7 @@ if (-not (Test-Path -Path "$releaseVersionDir\bin")) {
 Write-Host "Updating Module directory with built files..."
 Copy-Item -Path "$releaseBinDir\PSProxmox.dll" -Destination "$rootPath\Module\bin" -Force
 
-# Copy dependencies to the Module directory
+# Copy dependencies to the Module directory (all dependencies now in bin)
 Write-Host "Copying dependencies to Module directory..."
 Copy-Item -Path "$releaseBinDir\Newtonsoft.Json.dll" -Destination "$rootPath\Module\bin" -Force
 
@@ -64,3 +69,54 @@ Compress-Archive -Path "$releaseVersionDir\*" -DestinationPath $zipPath -Force
 Write-Host "Created release package: $zipPath"
 
 Write-Host "Build completed successfully!"
+
+# Publish to PowerShell Gallery if requested
+if ($Publish) {
+    Write-Host "Publishing to PowerShell Gallery..."
+
+    if (-not $NuGetApiKey) {
+        Write-Error "NuGetApiKey is required for publishing. Set the NUGET_API_KEY environment variable or pass -NuGetApiKey parameter."
+        exit 1
+    }
+
+    # Create proper folder structure for publishing: Module\PSProxmox\Version\Content
+    $publishBaseDir = "$rootPath\Publish"
+    $publishModuleDir = "$publishBaseDir\PSProxmox"
+    $publishVersionDir = "$publishModuleDir\$version"
+
+    # Clean and create publish directory structure
+    if (Test-Path -Path $publishBaseDir) {
+        Remove-Item -Path $publishBaseDir -Recurse -Force
+    }
+    New-Item -Path $publishVersionDir -ItemType Directory -Force | Out-Null
+    Write-Host "Created publish directory: $publishVersionDir"
+
+    # Copy module content to version directory
+    Copy-Item -Path "$rootPath\Module\PSProxmox.psd1" -Destination $publishVersionDir -Force
+    Copy-Item -Path "$rootPath\LICENSE" -Destination $publishVersionDir -Force
+    Copy-Item -Path "$rootPath\README.md" -Destination $publishVersionDir -Force
+    Copy-Item -Path "$rootPath\Module\bin" -Destination $publishVersionDir -Recurse -Force
+
+    # Also copy the manifest to the module level for Publish-Module to find
+    Copy-Item -Path "$rootPath\Module\PSProxmox.psd1" -Destination $publishModuleDir -Force
+
+    # Remove lib directory since we're loading everything from bin now
+    if (Test-Path -Path "$publishVersionDir\lib") {
+        Remove-Item -Path "$publishVersionDir\lib" -Recurse -Force
+    }
+
+    try {
+        # Publish from the PSProxmox level (not the version level)
+        Publish-Module -Path $publishModuleDir -NuGetApiKey $NuGetApiKey -LicenseUri 'https://github.com/Grace-Solutions/PSProxmox/blob/main/LICENSE' -Tag 'Proxmox','VirtualMachine','Cluster','Management' -ReleaseNotes "Updated to .NET Standard 2.0 for dual PowerShell 5.1/7+ support. Added missing SMBIOS cmdlets. Complete compatibility with both Windows PowerShell and PowerShell Core. Version consistency across all binaries." -Verbose
+        Write-Host "Successfully published PSProxmox version $version to PowerShell Gallery!" -ForegroundColor Green
+
+        # Clean up publish directory after successful publish
+        Remove-Item -Path $publishBaseDir -Recurse -Force
+        Write-Host "Cleaned up temporary publish directory"
+    }
+    catch {
+        Write-Error "Failed to publish module: $($_.Exception.Message)"
+        Write-Host "Publish directory preserved at: $publishBaseDir"
+        exit 1
+    }
+}
