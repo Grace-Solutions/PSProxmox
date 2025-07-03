@@ -5,6 +5,8 @@
     <AssemblyName>PSProxmox</AssemblyName>
     <RootNamespace>PSProxmox</RootNamespace>
     <Version>2025.07.03.1200</Version>
+    <AssemblyVersion>2025.07.03.1200</AssemblyVersion>
+    <FileVersion>2025.07.03.1200</FileVersion>
     <Authors>PSProxmox Team</Authors>
     <Description>PowerShell module for managing Proxmox VE clusters</Description>
     <Copyright>Copyright © 2023</Copyright>
