@@ -43,8 +43,8 @@ if (-not (Test-Path -Path $releaseBinDir)) {
 Write-Host "Building solution..."
 dotnet build "$rootPath\PSProxmox\PSProxmox.Main.csproj" -c Release -o $releaseBinDir
 
-# Copy the module files to the release directory
-Copy-Item -Path "$rootPath\Module\PSProxmox.psd1" -Destination $releaseVersionDir -Force
+# Copy the module files to the release directory (source from PSProxmox project)
+Copy-Item -Path "$rootPath\PSProxmox\PSProxmox.psd1" -Destination $releaseVersionDir -Force
 Copy-Item -Path "$rootPath\LICENSE" -Destination $releaseVersionDir -Force
 Copy-Item -Path "$rootPath\README.md" -Destination $releaseVersionDir -Force
 Copy-Item -Path "$scriptRoot\Install-PSProxmox.ps1" -Destination $releaseVersionDir -Force
@@ -63,6 +63,10 @@ Copy-Item -Path "$releaseBinDir\PSProxmox.dll" -Destination "$rootPath\Module\bi
 Write-Host "Copying dependencies to Module directory..."
 Copy-Item -Path "$releaseBinDir\Newtonsoft.Json.dll" -Destination "$rootPath\Module\bin" -Force
 
+# Copy the source manifest to Module directory
+Write-Host "Copying source manifest to Module directory..."
+Copy-Item -Path "$rootPath\PSProxmox\PSProxmox.psd1" -Destination "$rootPath\Module" -Force
+
 # Create a ZIP file of the release
 $zipPath = "$releaseBaseDir\PSProxmox-$version.zip"
 Compress-Archive -Path "$releaseVersionDir\*" -DestinationPath $zipPath -Force
@@ -79,44 +83,29 @@ if ($Publish) {
         exit 1
     }
 
-    # Create proper folder structure for publishing: Module\PSProxmox\Version\Content
-    $publishBaseDir = "$rootPath\Publish"
-    $publishModuleDir = "$publishBaseDir\PSProxmox"
+    # Use the existing Module\PSProxmox structure that we've already created
+    $publishModuleDir = "$rootPath\Module\PSProxmox"
+
+    # Ensure the version directory has the latest source files
     $publishVersionDir = "$publishModuleDir\$version"
 
-    # Clean and create publish directory structure
-    if (Test-Path -Path $publishBaseDir) {
-        Remove-Item -Path $publishBaseDir -Recurse -Force
-    }
-    New-Item -Path $publishVersionDir -ItemType Directory -Force | Out-Null
-    Write-Host "Created publish directory: $publishVersionDir"
+    # Copy the source psd1 to version directory (maintaining relative paths)
+    Copy-Item -Path "$rootPath\PSProxmox\PSProxmox.psd1" -Destination $publishVersionDir -Force
 
-    # Copy module content to version directory
-    Copy-Item -Path "$rootPath\Module\PSProxmox.psd1" -Destination $publishVersionDir -Force
-    Copy-Item -Path "$rootPath\LICENSE" -Destination $publishVersionDir -Force
-    Copy-Item -Path "$rootPath\README.md" -Destination $publishVersionDir -Force
-    Copy-Item -Path "$rootPath\Module\bin" -Destination $publishVersionDir -Recurse -Force
-
-    # Also copy the manifest to the module level for Publish-Module to find
-    Copy-Item -Path "$rootPath\Module\PSProxmox.psd1" -Destination $publishModuleDir -Force
-
-    # Remove lib directory since we're loading everything from bin now
-    if (Test-Path -Path "$publishVersionDir\lib") {
-        Remove-Item -Path "$publishVersionDir\lib" -Recurse -Force
-    }
+    # Copy the source psd1 to PSProxmox level for Publish-Module to find
+    Copy-Item -Path "$rootPath\PSProxmox\PSProxmox.psd1" -Destination $publishModuleDir -Force
 
     try {
+        # Enable TLS 1.2 for PowerShell Gallery
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
         # Publish from the PSProxmox level (not the version level)
         Publish-Module -Path $publishModuleDir -NuGetApiKey $NuGetApiKey -LicenseUri 'https://github.com/Grace-Solutions/PSProxmox/blob/main/LICENSE' -Tag 'Proxmox','VirtualMachine','Cluster','Management' -ReleaseNotes "Updated to .NET Standard 2.0 for dual PowerShell 5.1/7+ support. Added missing SMBIOS cmdlets. Complete compatibility with both Windows PowerShell and PowerShell Core. Version consistency across all binaries." -Verbose
         Write-Host "Successfully published PSProxmox version $version to PowerShell Gallery!" -ForegroundColor Green
-
-        # Clean up publish directory after successful publish
-        Remove-Item -Path $publishBaseDir -Recurse -Force
-        Write-Host "Cleaned up temporary publish directory"
     }
     catch {
         Write-Error "Failed to publish module: $($_.Exception.Message)"
-        Write-Host "Publish directory preserved at: $publishBaseDir"
+        Write-Host "Module structure preserved at: $publishModuleDir"
         exit 1
     }
 }
